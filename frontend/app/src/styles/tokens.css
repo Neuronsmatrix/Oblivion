@@ -1,0 +1,125 @@
+/* ==========================================================================
+   Phenograph Design System — tokens (ported from phenograph-design-system)
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  /* Brand palette (seeded naturals) */
+  --moss:         #a2b568;
+  --olive:        #697431;
+  --forest:       #475d2e;
+  --midnight:     #15282f;
+  --deep-teal:    #114643;
+  --teal-bright:  #068176;
+
+  /* Extended warm neutrals */
+  --paper:        #faf8f2;  /* page background */
+  --paper-2:      #f1ede3;  /* recessed surface */
+  --paper-3:      #e6e1d4;  /* hairlines */
+  --line:         #e6e1d4;
+
+  /* Cool neutrals for text */
+  --ink:          #15282f;  /* = midnight */
+  --ink-2:        #3a4a50;  /* secondary text */
+  --ink-3:        #6a757a;  /* tertiary / captions */
+  --ink-4:        #9aa2a6;  /* placeholder */
+
+  /* Semantic */
+  --fg:           var(--ink);
+  --fg-2:         var(--ink-2);
+  --fg-3:         var(--ink-3);
+  --fg-muted:     var(--ink-4);
+  --bg:           var(--paper);
+  --bg-2:         var(--paper-2);
+  --bg-inset:     #ffffff;
+  --accent:       var(--teal-bright);
+  --accent-ink:   #ffffff;          /* text on accent */
+  --focus:        var(--teal-bright);
+
+  /* Status */
+  --success:      #3f7a3a;
+  --success-bg:   #e8efdd;
+  --warning:      #8a6a1f;
+  --warning-bg:   #f5ecd0;
+  --danger:       #8a3a2e;
+  --danger-bg:    #f4dad3;
+  --info:         var(--deep-teal);
+  --info-bg:      #dde8e7;
+
+  /* Type */
+  --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --font-body:    'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --font-mono:    'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  /* Type scale — 1.200 modular, anchored at 16px */
+  --fs-11:        0.6875rem;
+  --fs-12:        0.75rem;
+  --fs-13:        0.8125rem;
+  --fs-14:        0.875rem;
+  --fs-16:        1rem;
+  --fs-18:        1.125rem;
+  --fs-20:        1.25rem;
+  --fs-24:        1.5rem;
+  --fs-30:        1.875rem;
+  --fs-36:        2.25rem;
+  --fs-48:        3rem;
+  --fs-60:        3.75rem;
+  --fs-72:        4.5rem;
+
+  /* Line-heights */
+  --lh-tight:     1.1;
+  --lh-snug:      1.25;
+  --lh-normal:    1.5;
+  --lh-loose:     1.7;
+
+  /* Spacing — 4px base */
+  --space-1:      4px;
+  --space-2:      8px;
+  --space-3:      12px;
+  --space-4:      16px;
+  --space-5:      20px;
+  --space-6:      24px;
+  --space-8:      32px;
+  --space-10:     40px;
+  --space-12:     48px;
+  --space-16:     64px;
+  --space-24:     96px;
+  --space-32:     128px;
+
+  /* Radii */
+  --radius-sm:    4px;
+  --radius-md:    8px;
+  --radius-lg:    16px;
+  --radius-full:  9999px; /* tags only */
+
+  /* Shadows */
+  --shadow-1:     0 1px 2px rgba(21,40,47,0.04), 0 1px 1px rgba(21,40,47,0.03);
+  --shadow-2:     0 8px 24px rgba(21,40,47,0.08), 0 2px 6px rgba(21,40,47,0.06);
+
+  /* Layout */
+  --container-prose:     72ch;
+  --container-marketing: 1200px;
+  --container-app:       1440px;
+
+  /* Motion */
+  --ease-out:    cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --dur-fast:    150ms;
+  --dur-med:     220ms;
+  --dur-slow:    320ms;
+}
+
+/* Dark surface (for hero, data viz dark mode) */
+.on-dark,
+:root .on-dark {
+  --fg:        #f1ede3;
+  --fg-2:      #c7c0b0;
+  --fg-3:      #8d938f;
+  --bg:        var(--midnight);
+  --bg-2:      #1d343b;
+  --bg-inset:  #0d1d23;
+  --line:      #2a3d44;
+  --accent:    var(--moss);
+  --accent-ink: var(--midnight);
+}

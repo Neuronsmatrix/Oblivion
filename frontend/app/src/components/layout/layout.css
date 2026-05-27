@@ -1,0 +1,53 @@
+.app-shell {
+  display: grid;
+  grid-template-columns: 232px 1fr;
+  min-height: 100vh;
+  background: var(--paper);
+}
+
+.app-shell__sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.app-shell__main {
+  min-width: 0;
+}
+
+.app-shell__topbar {
+  border-bottom: 1px solid var(--line);
+  padding: 12px 24px;
+  background: rgba(250, 248, 242, 0.8);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+
+.app-shell__menu-btn { display: none; }
+.app-shell__backdrop { display: none; }
+
+@media (max-width: 1023px) {
+  .app-shell { grid-template-columns: 1fr; }
+  .app-shell__sidebar {
+    position: fixed;
+    left: 0; top: 0; bottom: 0;
+    width: 264px;
+    z-index: 30;
+    transform: translateX(-100%);
+    transition: transform var(--dur-med) var(--ease-out);
+    box-shadow: var(--shadow-2);
+  }
+  .app-shell[data-open='true'] .app-shell__sidebar { transform: translateX(0); }
+  .app-shell[data-open='true'] .app-shell__backdrop {
+    display: block;
+    position: fixed; inset: 0; background: rgba(21,40,47,0.32); z-index: 20;
+  }
+  .app-shell__menu-btn { display: inline-flex; }
+}
