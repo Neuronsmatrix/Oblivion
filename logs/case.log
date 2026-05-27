@@ -1,0 +1,5 @@
+{"timestamp":"2026-05-27T09:37:29.483094Z","level":"INFO","fields":{"message":"case service starting","port":3002,"schema":"cases"},"target":"oblivion_case"}
+{"timestamp":"2026-05-27T09:37:29.599325Z","level":"INFO","fields":{"message":"listening","addr":"0.0.0.0:3002"},"target":"oblivion_case"}
+{"timestamp":"2026-05-27T09:37:29.599560Z","level":"INFO","fields":{"message":"Kafka result consumer started, listening on analysis.results"},"target":"oblivion_case::kafka"}
+{"timestamp":"2026-05-27T09:38:36.549822Z","level":"WARN","fields":{"message":"Received analysis result for unknown case","case_id":"02d63f83-4f35-41b1-be5c-d3d39bd9c2d3"},"target":"oblivion_case::kafka"}
+{"timestamp":"2026-05-27T09:38:37.116187Z","level":"WARN","fields":{"message":"Received analysis result for unknown case","case_id":"a00e7ed9-c6fc-431e-ae6b-b2178515610a"},"target":"oblivion_case::kafka"}

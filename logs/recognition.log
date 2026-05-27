@@ -1,0 +1,8 @@
+{"timestamp":"2026-05-27T09:37:29.483989Z","level":"INFO","fields":{"message":"starting recognition service","port":3004,"kafka_brokers":"localhost:9092","group_id":"recognition-service"},"target":"oblivion_recognition"}
+{"timestamp":"2026-05-27T09:37:29.484075Z","level":"INFO","fields":{"message":"syndrome catalogue loaded","count":50},"target":"oblivion_recognition"}
+{"timestamp":"2026-05-27T09:37:29.484957Z","level":"INFO","fields":{"message":"HTTP server listening","address":"0.0.0.0:3004"},"target":"oblivion_recognition"}
+{"timestamp":"2026-05-27T09:37:29.485056Z","level":"INFO","fields":{"message":"recognition consumer subscribed","topic":"analysis.requests"},"target":"oblivion_recognition::kafka"}
+{"timestamp":"2026-05-27T09:38:35.107495Z","level":"INFO","fields":{"message":"processing analysis request","request_id":"e10c9e0b-d995-4325-a491-8c58faec730d","case_id":"02d63f83-4f35-41b1-be5c-d3d39bd9c2d3"},"target":"oblivion_recognition::kafka"}
+{"timestamp":"2026-05-27T09:38:36.548792Z","level":"INFO","fields":{"message":"published result for request","request_id":"e10c9e0b-d995-4325-a491-8c58faec730d","partition":0,"offset":12},"target":"oblivion_recognition::kafka"}
+{"timestamp":"2026-05-27T09:38:36.548885Z","level":"INFO","fields":{"message":"processing analysis request","request_id":"aee9d24a-82c5-41fe-826c-2efca4712617","case_id":"a00e7ed9-c6fc-431e-ae6b-b2178515610a"},"target":"oblivion_recognition::kafka"}
+{"timestamp":"2026-05-27T09:38:37.114544Z","level":"INFO","fields":{"message":"published result for request","request_id":"aee9d24a-82c5-41fe-826c-2efca4712617","partition":0,"offset":13},"target":"oblivion_recognition::kafka"}

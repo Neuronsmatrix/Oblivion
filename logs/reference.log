@@ -1,0 +1,3 @@
+{"timestamp":"2026-05-27T09:37:29.483273Z","level":"INFO","fields":{"message":"reference service starting","port":3006,"schema":"reference","elasticsearch":"http://localhost:9200"},"target":"oblivion_reference"}
+{"timestamp":"2026-05-27T09:37:29.531444Z","level":"INFO","fields":{"message":"Elasticsearch indices ready"},"target":"oblivion_reference"}
+{"timestamp":"2026-05-27T09:37:29.532189Z","level":"INFO","fields":{"message":"listening","address":"0.0.0.0:3006"},"target":"oblivion_reference"}

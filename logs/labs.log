@@ -1,0 +1,6 @@
+{"timestamp":"2026-05-27T09:37:29.484433Z","level":"INFO","fields":{"message":"labs service starting","port":3003,"schema":"labs","kafka_brokers":"localhost:9092","billing_url":"http://localhost:3007"},"target":"oblivion_labs"}
+{"timestamp":"2026-05-27T09:37:29.517502Z","level":"INFO","fields":{"message":"analysis results consumer started","topic":"analysis.results","group_id":"labs-service"},"target":"oblivion_labs::kafka"}
+{"timestamp":"2026-05-27T09:37:29.528696Z","level":"INFO","fields":{"message":"listening","address":"0.0.0.0:3003"},"target":"oblivion_labs"}
+{"timestamp":"2026-05-27T09:37:49.876970Z","level":"ERROR","fields":{"message":"response failed","classification":"Status code: 500 Internal Server Error","latency":"5 ms"},"target":"tower_http::trace::on_failure"}
+{"timestamp":"2026-05-27T09:38:18.434965Z","level":"ERROR","fields":{"message":"response failed","classification":"Status code: 500 Internal Server Error","latency":"2 ms"},"target":"tower_http::trace::on_failure"}
+{"timestamp":"2026-05-27T09:38:37.123821Z","level":"INFO","fields":{"message":"batch fully processed","batch_id":"4b419042-ee98-42f4-b605-e063ead5ffb3","lab_id":"37ae4b8b-f5bc-431c-bbb2-29617f7b1b57","total_items":2},"target":"oblivion_labs::kafka"}

@@ -1,0 +1,2 @@
+{"timestamp":"2026-05-27T09:37:29.482798Z","level":"INFO","fields":{"message":"billing service starting","port":3007,"schema":"billing"},"target":"oblivion_billing"}
+{"timestamp":"2026-05-27T09:37:29.509684Z","level":"INFO","fields":{"message":"listening","address":"0.0.0.0:3007"},"target":"oblivion_billing"}

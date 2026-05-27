@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Architecture - Genetic Disease Recognition</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        h1 {
+            color: #fff;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 1.8rem;
+        }
+        .subtitle {
+            color: #94a3b8;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+        }
+        .diagram-container {
+            background: #fff;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            overflow-x: auto;
+        }
+        .mermaid { 
+            display: flex; 
+            justify-content: center;
+            min-width: 1200px;
+        }
+        .legend {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #e2e8f0;
+            font-size: 0.85rem;
+        }
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+            flex-shrink: 0;
+        }
+        .notes {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            color: #cbd5e1;
+            font-size: 0.9rem;
+        }
+        .notes h3 { color: #fff; margin-bottom: 10px; }
+        .notes ul { padding-left: 20px; }
+        .notes li { margin: 5px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧬 System Architecture: Genetic Disease Recognition</h1>
+        <p class="subtitle">Микросервисная архитектура с асинхронной обработкой</p>
+        
+        <div class="diagram-container">
+            <div class="mermaid">
+flowchart TB
+    subgraph CLIENTS["👥 Клиенты"]
+        direction LR
+        WEB["🌐 Web App\n(React)"]
+        MOBILE["📱 Mobile App\n(Flutter)"]
+        LAB_API["🔬 Labs API\n(REST/gRPC)"]
+    end
+
+    subgraph EDGE["🌍 Edge Layer"]
+        CDN["☁️ CDN\n(CloudFlare)"]
+        LB["⚖️ Load Balancer\n(nginx)"]
+    end
+
+    subgraph K8S["☸️ Kubernetes Cluster"]
+        
+        subgraph GATEWAY["🚪 API Gateway"]
+            APIGW["Kong/Traefik"]
+            RATE["Rate Limiter"]
+        end
+
+        subgraph SERVICES["🔧 Микросервисы"]
+            
+            subgraph CORE["Core"]
+                AUTH["🔐 Auth\nJWT + RBAC"]
+                CASE["📋 Case Service\nCRUD"]
+                LABS["🔬 Labs Service"]
+            end
+
+            subgraph ASYNC["Async"]
+                RECOG["🧠 Recognition\nML/GPU"]
+                NOTIFY["📨 Notifier"]
+            end
+
+            subgraph SUPPORT["Support"]
+                REFS["📚 Reference\nHPO/OMIM"]
+                BILLING["💳 Billing"]
+            end
+        end
+
+        subgraph KAFKA["📬 Kafka"]
+            T1["analysis.requests"]
+            T2["analysis.results"]
+            T3["notifications"]
+        end
+    end
+
+    subgraph STORAGE["💾 Storage"]
+        PG[("🐘 PostgreSQL")]
+        S3["📦 S3/MinIO"]
+        REDIS[("⚡ Redis")]
+        VECTORS["📊 Vector DB"]
+    end
+
+    WEB & MOBILE --> CDN --> LB
+    LAB_API --> LB
+    LB --> APIGW --> RATE
+    
+    RATE --> AUTH & CASE & LABS
+    
+    AUTH --> REDIS
+    CASE --> PG & S3
+    CASE --> T1
+    LABS --> PG & REDIS
+    LABS --> T1
+    
+    T1 --> RECOG
+    RECOG --> VECTORS & S3
+    RECOG --> T2
+    T2 --> CASE
+    T2 --> T3
+    T3 --> NOTIFY
+    
+    REFS --> PG
+    BILLING --> PG & REDIS
+
+    classDef client fill:#818cf8,stroke:#4f46e5,color:#fff
+    classDef edge fill:#fbbf24,stroke:#d97706,color:#000
+    classDef gateway fill:#60a5fa,stroke:#2563eb,color:#fff
+    classDef core fill:#34d399,stroke:#059669,color:#000
+    classDef async fill:#f472b6,stroke:#db2777,color:#fff
+    classDef storage fill:#a78bfa,stroke:#7c3aed,color:#fff
+    classDef kafka fill:#fb923c,stroke:#ea580c,color:#000
+
+    class WEB,MOBILE,LAB_API client
+    class CDN,LB edge
+    class APIGW,RATE gateway
+    class AUTH,CASE,LABS,REFS,BILLING core
+    class RECOG,NOTIFY async
+    class PG,S3,REDIS,VECTORS storage
+    class T1,T2,T3 kafka
+            </div>
+        </div>
+
+        <div class="legend">
+            <div class="legend-item"><div class="legend-color" style="background:#818cf8"></div>Клиенты (Web/Mobile/API)</div>
+            <div class="legend-item"><div class="legend-color" style="background:#fbbf24"></div>Edge (CDN, Load Balancer)</div>
+            <div class="legend-item"><div class="legend-color" style="background:#60a5fa"></div>API Gateway + Rate Limiting</div>
+            <div class="legend-item"><div class="legend-color" style="background:#34d399"></div>Core Services (синхронные)</div>
+            <div class="legend-item"><div class="legend-color" style="background:#f472b6"></div>Async Services (через Kafka)</div>
+            <div class="legend-item"><div class="legend-color" style="background:#fb923c"></div>Kafka Topics</div>
+            <div class="legend-item"><div class="legend-color" style="background:#a78bfa"></div>Storage (PostgreSQL, S3, Redis)</div>
+        </div>
+
+        <div class="notes">
+            <h3>📝 Ключевые потоки данных:</h3>
+            <ul>
+                <li><strong>Врач создаёт кейс:</strong> Client → Gateway → Case Service → PostgreSQL + S3 → Kafka (analysis.requests)</li>
+                <li><strong>Анализ изображения:</strong> Kafka → Recognition Service → Vector DB → Kafka (analysis.results) → Case Service</li>
+                <li><strong>Labs batch запрос:</strong> Labs API → Gateway → Labs Service → Kafka → Recognition → результат в Redis cache</li>
+                <li><strong>Уведомления:</strong> Kafka (notifications) → Notifier → Email/Push/Webhook</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        mermaid.initialize({ 
+            startOnLoad: true,
+            theme: 'base',
+            themeVariables: {
+                fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                fontSize: '14px'
+            },
+            flowchart: {
+                useMaxWidth: false,
+                htmlLabels: true,
+                curve: 'basis'
+            }
+        });
+    </script>
+</body>
+</html>

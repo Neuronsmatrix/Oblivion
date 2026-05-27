@@ -1,0 +1,2 @@
+{"timestamp":"2026-05-27T09:37:29.482017Z","level":"INFO","fields":{"message":"auth service starting","port":3001,"schema":"auth"},"target":"oblivion_auth"}
+{"timestamp":"2026-05-27T09:37:29.518645Z","level":"INFO","fields":{"message":"listening","address":"0.0.0.0:3001"},"target":"oblivion_auth"}

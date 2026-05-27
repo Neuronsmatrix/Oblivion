@@ -1,0 +1,156 @@
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#4F46E5', 'primaryTextColor': '#fff', 'primaryBorderColor': '#3730A3', 'lineColor': '#6B7280', 'secondaryColor': '#10B981', 'tertiaryColor': '#F3F4F6'}}}%%
+
+flowchart TB
+    subgraph CLIENTS["👥 Клиенты"]
+        direction LR
+        WEB["🌐 Web App<br/>(React)"]
+        MOBILE["📱 Mobile App<br/>(Flutter)"]
+        LAB_API["🔬 Labs API<br/>(REST/gRPC)"]
+    end
+
+    subgraph EDGE["🌍 Edge Layer"]
+        CDN["☁️ CDN<br/>(CloudFlare)"]
+        LB["⚖️ Load Balancer<br/>(nginx/HAProxy)"]
+    end
+
+    subgraph K8S["☸️ Kubernetes Cluster"]
+        
+        subgraph GATEWAY["🚪 API Gateway Layer"]
+            APIGW["API Gateway<br/>(Kong/Traefik)"]
+            RATE["Rate Limiter<br/>(для Labs)"]
+        end
+
+        subgraph SERVICES["🔧 Микросервисы"]
+            direction TB
+            
+            subgraph CORE["Core Services"]
+                AUTH["🔐 Auth Service<br/>JWT + RBAC"]
+                CASE["📋 Case Service<br/>CRUD кейсов"]
+                LABS["🔬 Labs Service<br/>API для лабораторий"]
+            end
+
+            subgraph ASYNC["Async Processing"]
+                RECOG["🧠 Recognition Service<br/>ML Inference<br/>(GPU nodes)"]
+                NOTIFY["📨 Notifier Service<br/>Email/Push/Webhook"]
+            end
+
+            subgraph SUPPORT["Support Services"]
+                REFS["📚 Reference Service<br/>HPO/OMIM/Syndromes"]
+                BILLING["💳 Billing Service<br/>Тарифы Labs"]
+            end
+        end
+
+        subgraph MESSAGING["📬 Message Broker"]
+            KAFKA["Apache Kafka"]
+            
+            subgraph TOPICS["Topics"]
+                T1["analysis.requests"]
+                T2["analysis.results"]
+                T3["notifications"]
+                T4["labs.batch"]
+            end
+        end
+
+    end
+
+    subgraph STORAGE["💾 Storage Layer"]
+        direction TB
+        
+        subgraph PRIMARY["Primary Storage"]
+            PG[("🐘 PostgreSQL<br/>Cases, Users,<br/>Diagnoses")]
+            S3["📦 S3/MinIO<br/>Images,<br/>VCF files"]
+        end
+
+        subgraph CACHE["Cache Layer"]
+            REDIS[("⚡ Redis<br/>Sessions,<br/>Rate Limits,<br/>Labs Cache")]
+        end
+
+        subgraph SEARCH["Search & Analytics"]
+            ES["🔍 Elasticsearch<br/>HPO Search,<br/>Logs"]
+        end
+
+        subgraph ML_STORE["ML Storage"]
+            MODEL["🤖 Model Registry<br/>MLflow/W&B"]
+            VECTORS["📊 Vector DB<br/>Face Embeddings"]
+        end
+    end
+
+    subgraph MONITORING["📊 Observability"]
+        direction LR
+        PROM["Prometheus"]
+        GRAF["Grafana"]
+        JAEGER["Jaeger<br/>Tracing"]
+        ELK["ELK Stack<br/>Logs"]
+    end
+
+    %% Connections - Client to Edge
+    WEB --> CDN
+    MOBILE --> CDN
+    LAB_API --> LB
+    CDN --> LB
+
+    %% Edge to Gateway
+    LB --> APIGW
+    APIGW --> RATE
+    
+    %% Gateway to Services
+    RATE --> AUTH
+    RATE --> CASE
+    RATE --> LABS
+    
+    %% Service interconnections
+    AUTH --> REDIS
+    CASE --> PG
+    CASE --> S3
+    CASE --> KAFKA
+    LABS --> PG
+    LABS --> REDIS
+    LABS --> KAFKA
+    
+    %% Kafka to async services
+    KAFKA --> RECOG
+    KAFKA --> NOTIFY
+    
+    %% Recognition flow
+    RECOG --> MODEL
+    RECOG --> VECTORS
+    RECOG --> KAFKA
+    RECOG --> S3
+    
+    %% Notify connections
+    NOTIFY --> PG
+    
+    %% Reference service
+    REFS --> ES
+    REFS --> PG
+    
+    %% Billing
+    BILLING --> PG
+    BILLING --> REDIS
+    
+    %% Monitoring connections
+    SERVICES --> PROM
+    PROM --> GRAF
+    SERVICES --> JAEGER
+    SERVICES --> ELK
+
+    %% Styling
+    classDef client fill:#E0E7FF,stroke:#4F46E5,stroke-width:2px
+    classDef edge fill:#FEF3C7,stroke:#D97706,stroke-width:2px
+    classDef gateway fill:#DBEAFE,stroke:#2563EB,stroke-width:2px
+    classDef service fill:#D1FAE5,stroke:#059669,stroke-width:2px
+    classDef async fill:#FDE68A,stroke:#D97706,stroke-width:2px
+    classDef storage fill:#E0E7FF,stroke:#4F46E5,stroke-width:2px
+    classDef cache fill:#FEE2E2,stroke:#DC2626,stroke-width:2px
+    classDef messaging fill:#FCE7F3,stroke:#DB2777,stroke-width:2px
+    classDef monitoring fill:#F3F4F6,stroke:#6B7280,stroke-width:2px
+
+    class WEB,MOBILE,LAB_API client
+    class CDN,LB edge
+    class APIGW,RATE gateway
+    class AUTH,CASE,LABS,REFS,BILLING service
+    class RECOG,NOTIFY async
+    class PG,S3,MODEL,VECTORS storage
+    class REDIS cache
+    class KAFKA,T1,T2,T3,T4 messaging
+    class PROM,GRAF,JAEGER,ELK monitoring

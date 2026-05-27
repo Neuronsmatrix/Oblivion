@@ -1,0 +1,173 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Phenograph — Phenotype, precisely read.</title>
+  <link rel="stylesheet" href="colors_and_type.css">
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    html { scroll-behavior: smooth; }
+    body { overflow-x: hidden; background: var(--paper); }
+
+    /* Top bar */
+    .topbar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 40px;
+      background: rgba(250,248,242,0.72);
+      backdrop-filter: blur(10px) saturate(140%);
+      -webkit-backdrop-filter: blur(10px) saturate(140%);
+      border-bottom: 1px solid var(--line);
+    }
+    .topbar.dark {
+      background: rgba(21,40,47,0.55);
+      border-bottom: 1px solid rgba(231,225,212,0.08);
+      color: var(--paper-2);
+    }
+    .topbar.dark .nav-link { color: var(--paper-2); }
+    .topbar.dark .nav-link.muted { color: #8d938f; }
+
+    .nav-links { display: flex; gap: 28px; align-items: center; }
+    .nav-link { font-size: 13px; font-weight: 500; color: var(--ink-2); text-decoration: none; letter-spacing: 0.01em; }
+    .nav-link.muted { color: var(--ink-3); }
+
+    /* Variant switcher */
+    .variant-toggle {
+      display: inline-flex; padding: 3px; border-radius: 999px;
+      background: rgba(21,40,47,0.06); border: 1px solid var(--line);
+      gap: 2px;
+    }
+    .topbar.dark .variant-toggle { background: rgba(241,237,227,0.08); border-color: rgba(231,225,212,0.12); }
+    .variant-toggle button {
+      font-family: var(--font-body); font-size: 12px; font-weight: 500; letter-spacing: 0.02em;
+      padding: 6px 14px; border-radius: 999px; border: 0; background: transparent;
+      color: var(--ink-2); cursor: pointer; transition: background 220ms var(--ease-out), color 220ms var(--ease-out);
+    }
+    .topbar.dark .variant-toggle button { color: var(--paper-2); }
+    .variant-toggle button.active { background: var(--paper); color: var(--ink); box-shadow: var(--shadow-1); }
+    .topbar.dark .variant-toggle button.active { background: var(--midnight); color: var(--paper-2); box-shadow: none; border: 1px solid rgba(231,225,212,0.14); }
+
+    /* Progress rail */
+    .progress-rail {
+      position: fixed; right: 28px; bottom: 32px;
+      z-index: 90; display: flex; flex-direction: row; gap: 20px; align-items: center;
+    }
+    .progress-rail .rail-item {
+      display: flex; align-items: center; gap: 10px;
+      font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--ink-3);
+      transition: color 300ms var(--ease-out), opacity 300ms var(--ease-out);
+    }
+    .progress-rail.dark .rail-item { color: rgba(231,225,212,0.45); }
+    .progress-rail .rail-item .tick { width: 28px; height: 1px; background: currentColor; opacity: 0.5; transition: width 300ms var(--ease-out), opacity 300ms var(--ease-out); }
+    .progress-rail .rail-item.active { color: var(--teal-bright); }
+    .progress-rail.dark .rail-item.active { color: var(--moss); }
+    .progress-rail .rail-item.active .tick { width: 56px; opacity: 1; }
+
+    /* Section spine */
+    .act { position: relative; width: 100%; }
+    .act-sticky { position: sticky; top: 0; height: 100vh; overflow: hidden; }
+
+    /* --- Act I (light variant A) --- */
+    .act-1-bg {
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(1100px 700px at 80% 30%, rgba(6,129,118,0.06), transparent 60%);
+    }
+    .act-1-bg.dark {
+      background: transparent;
+    }
+    .grain-overlay {
+      position: absolute; inset: 0; pointer-events: none;
+      background-image: url('assets/grain.svg');
+      background-size: 240px;
+      opacity: 0.035; mix-blend-mode: multiply;
+    }
+    .grain-overlay.dark { opacity: 0.08; mix-blend-mode: screen; }
+
+    /* Eyebrow, headline, etc. */
+    .eyebrow-mono {
+      font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--teal-bright); font-weight: 500;
+    }
+    .on-dark-text { color: var(--paper-2); }
+
+    /* Scroll-reveal letters */
+    .reveal-letter { display: inline-block; opacity: 0; transform: translateY(0.4em); transition: opacity 700ms var(--ease-out), transform 700ms var(--ease-out); }
+    .reveal-letter.in { opacity: 1; transform: translateY(0); }
+
+    /* Act II mesh container */
+    .mesh-stage { position: absolute; inset: 0; display: grid; place-items: center; }
+
+    /* Unified particle layer — spans Act I (as DNA rung points) and Act II (as landmarks) */
+    .particle-layer {
+      position: fixed; inset: 0; pointer-events: none; z-index: 5;
+    }
+
+    /* Feature label tag (Act II) */
+    .feat-tag {
+      position: absolute; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.04em;
+      color: var(--ink-2); background: rgba(250,248,242,0.85); border: 1px solid var(--line);
+      padding: 4px 8px; border-radius: 4px; white-space: nowrap;
+      opacity: 0; transform: translateY(4px);
+      transition: opacity 420ms var(--ease-out), transform 420ms var(--ease-out);
+    }
+    .feat-tag.dark { color: var(--paper-2); background: rgba(17,30,35,0.78); border-color: rgba(231,225,212,0.12); }
+    .feat-tag.in { opacity: 1; transform: translateY(0); }
+    .feat-tag .dot { display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: var(--teal-bright); margin-right: 6px; vertical-align: middle; }
+    .feat-tag.dark .dot { background: var(--moss); }
+
+    /* Act III stat card */
+    .stat-card { border-top: 1px solid var(--line); padding-top: 20px; }
+    .stat-card.dark { border-top-color: rgba(231,225,212,0.16); }
+    .stat-num { font-family: var(--font-display); font-weight: 500; font-size: 80px; line-height: 0.95; letter-spacing: -0.025em; color: var(--ink); }
+    .stat-num.dark { color: var(--moss); }
+    .stat-label { font-size: 13px; color: var(--ink-3); margin-top: 12px; line-height: 1.5; max-width: 240px; }
+    .stat-label.dark { color: #c7c0b0; }
+
+    /* Bottom hint */
+    .scroll-hint {
+      position: absolute; bottom: 28px; left: 50%; transform: translateX(-50%);
+      font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--ink-3); display: flex; align-items: center; gap: 10px;
+    }
+    .scroll-hint.dark { color: rgba(231,225,212,0.4); }
+    .scroll-hint .bar { width: 1px; height: 36px; background: currentColor; opacity: 0.4; position: relative; overflow: hidden; }
+    .scroll-hint .bar::after {
+      content: ""; position: absolute; left: 0; top: 0; width: 100%; height: 40%; background: var(--teal-bright);
+      animation: drip 2.2s cubic-bezier(0.4,0,0.2,1) infinite;
+    }
+    @keyframes drip { 0% { transform: translateY(-100%); } 100% { transform: translateY(250%); } }
+
+    /* Cursor-less SVG strokes */
+    svg { display: block; }
+
+    /* Responsive caps */
+    @media (max-width: 900px) {
+      .progress-rail { display: none; }
+      .topbar { padding: 14px 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel" src="components/MainScreen.jsx"></script>
+  <script type="text/babel" src="components/TopBar.jsx"></script>
+  <script type="text/babel" src="components/ProgressRail.jsx"></script>
+  <script type="text/babel" src="components/ActTitle.jsx"></script>
+  <script type="text/babel" src="components/ActMesh.jsx"></script>
+  <script type="text/babel" src="components/ActStats.jsx"></script>
+  <script type="text/babel" src="components/DnaRibbon.jsx"></script>
+  <script type="text/babel" src="components/FaceMesh.jsx"></script>
+  <script type="text/babel" src="components/ParticleLayer.jsx"></script>
+  <script type="text/babel" src="components/useScrollProgress.jsx"></script>
+
+  <script type="text/babel" data-presets="react">
+    ReactDOM.createRoot(document.getElementById('root')).render(<MainScreen />);
+  </script>
+</body>
+</html>

@@ -1,0 +1,812 @@
+openapi: 3.1.0
+info:
+  title: Oblivion API
+  version: "1.0.0"
+  description: |
+    REST API for **Oblivion**, a face / genetic-syndrome recognition backend.
+
+    The system is split into 7 independent microservices. They sit behind an
+    nginx **API gateway** at `http://localhost:8080`, which routes by path
+    prefix to the right service — so this whole API is one origin and
+    "Try it out" works without switching ports. Endpoints are grouped by the
+    **tag** (= service); the direct per-service ports are noted on each tag for
+    when you want to bypass the gateway.
+
+    ## Conventions
+    - Every response is wrapped in an envelope:
+      `{ "status": "ok" | "error", "data": <payload> | null, "error": <string> | null }`.
+    - Authenticated endpoints expect `Authorization: Bearer <access_token>`,
+      a RS256 JWT issued by the auth service.
+    - Roles: `doctor`, `lab`, `admin`. Lab endpoints require a `lab` token.
+
+    ## Typical flow
+    1. `POST /auth/register` then `POST /auth/login` → access token.
+    2. `POST /cases` → returns a presigned S3 `upload_url`.
+    3. `PUT` the image bytes to `upload_url` (MinIO/S3, no auth).
+    4. `POST /cases/{id}/confirm-upload` → triggers async analysis (Kafka).
+    5. Poll `GET /cases/{id}` until `status = completed`; read `diagnoses`.
+
+servers:
+  - url: http://localhost:8080
+    description: API gateway (nginx) — routes by path prefix to all services
+
+tags:
+  - name: auth
+    description: "Authentication & JWT issuance — http://localhost:3001"
+  - name: cases
+    description: "Clinical cases & image upload (doctor flow) — http://localhost:3002"
+  - name: labs
+    description: "Lab batch processing — http://localhost:3003"
+  - name: recognition
+    description: "ML inference (mock) — http://localhost:3004"
+  - name: notifier
+    description: "In-app notifications — http://localhost:3005"
+  - name: reference
+    description: "Syndrome / HPO reference data — http://localhost:3006"
+  - name: billing
+    description: "Plans, subscriptions, usage — http://localhost:3007"
+
+# ───────────────────────────────────────────────────────────────────────────
+paths:
+
+  # ── auth (3001) ────────────────────────────────────────────────────────────
+  /auth/register:
+    post:
+      tags: [auth]
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RegisterRequest' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - properties: { data: { $ref: '#/components/schemas/User' } }
+        '409': { $ref: '#/components/responses/Error' }
+        '422': { $ref: '#/components/responses/Error' }
+
+  /auth/login:
+    post:
+      tags: [auth]
+      summary: Log in and obtain tokens
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LoginRequest' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - properties: { data: { $ref: '#/components/schemas/AuthTokens' } }
+        '401': { $ref: '#/components/responses/Error' }
+
+  /auth/refresh:
+    post:
+      tags: [auth]
+      summary: Exchange a refresh token for a new token pair
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refresh_token]
+              properties: { refresh_token: { type: string } }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - properties: { data: { $ref: '#/components/schemas/AuthTokens' } }
+        '401': { $ref: '#/components/responses/Error' }
+
+  /auth/me:
+    get:
+      tags: [auth]
+      summary: Get the current user
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - properties: { data: { $ref: '#/components/schemas/User' } }
+        '401': { $ref: '#/components/responses/Error' }
+
+  /auth/logout:
+    delete:
+      tags: [auth]
+      summary: Revoke a refresh token
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refresh_token]
+              properties: { refresh_token: { type: string } }
+      responses:
+        '200': { $ref: '#/components/responses/OkEmpty' }
+        '401': { $ref: '#/components/responses/Error' }
+
+  # ── cases (3002) ───────────────────────────────────────────────────────────
+  /cases:
+    post:
+      tags: [cases]
+      summary: Create a case and get a presigned upload URL
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateCaseRequest' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - properties: { data: { $ref: '#/components/schemas/CreateCaseResponse' } }
+        '401': { $ref: '#/components/responses/Error' }
+    get:
+      tags: [cases]
+      summary: List the caller's cases
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { $ref: '#/components/parameters/Limit' }
+        - { $ref: '#/components/parameters/Offset' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - properties:
+                      data:
+                        type: array
+                        items: { $ref: '#/components/schemas/Case' }
+
+  /cases/{id}:
+    parameters: [{ $ref: '#/components/parameters/IdPath' }]
+    get:
+      tags: [cases]
+      summary: Get a case with its diagnoses
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - properties: { data: { $ref: '#/components/schemas/CaseWithDiagnoses' } }
+        '403': { $ref: '#/components/responses/Error' }
+        '404': { $ref: '#/components/responses/Error' }
+    patch:
+      tags: [cases]
+      summary: Update case patient metadata
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateCaseRequest' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - properties: { data: { $ref: '#/components/schemas/Case' } }
+
+  /cases/{id}/confirm-upload:
+    parameters: [{ $ref: '#/components/parameters/IdPath' }]
+    post:
+      tags: [cases]
+      summary: Confirm image upload and start analysis
+      description: >
+        Verifies the image exists in S3, moves the case to `processing`, and
+        publishes an analysis request onto Kafka.
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { $ref: '#/components/responses/OkEmpty' }
+        '404':
+          description: Case or uploaded image not found
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Envelope' }
+        '409':
+          description: Case is not in the pending state
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Envelope' }
+
+  # ── labs (3003) ────────────────────────────────────────────────────────────
+  /labs/batch:
+    post:
+      tags: [labs]
+      summary: Submit a batch of images for analysis
+      description: Checks the lab's quota with the billing service, then enqueues each image.
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [image_keys]
+              properties:
+                image_keys:
+                  type: array
+                  items: { type: string }
+                  example: ["batch1/a.jpg", "batch1/b.jpg"]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - properties: { data: { $ref: '#/components/schemas/BatchWithItems' } }
+        '402':
+          description: Quota exceeded / no active subscription
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Envelope' }
+        '401': { $ref: '#/components/responses/Error' }
+
+  /labs/results/{batch_id}:
+    parameters:
+      - name: batch_id
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    get:
+      tags: [labs]
+      summary: Get batch status and per-item results
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - properties: { data: { $ref: '#/components/schemas/BatchWithItems' } }
+        '404': { $ref: '#/components/responses/Error' }
+
+  /labs/usage:
+    get:
+      tags: [labs]
+      summary: Current month usage for the calling lab
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: OK (data is null until the lab has a subscription)
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - properties:
+                      data:
+                        oneOf:
+                          - { $ref: '#/components/schemas/UsageInfo' }
+                          - { type: 'null' }
+
+  /labs/tiers:
+    get:
+      tags: [labs]
+      summary: List available subscription tiers
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - properties:
+                      data:
+                        type: array
+                        items: { $ref: '#/components/schemas/Plan' }
+
+  # ── recognition (3004) ─────────────────────────────────────────────────────
+  /recognize:
+    post:
+      tags: [recognition]
+      summary: Run recognition directly (mock; ignores image content)
+      description: >
+        Diagnostic/testing endpoint. The production path is asynchronous via
+        Kafka. This service is a **mock** — it returns random top-10 diagnoses.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - properties: { data: { $ref: '#/components/schemas/AnalysisResult' } }
+
+  # ── notifier (3005) ────────────────────────────────────────────────────────
+  /notifications:
+    get:
+      tags: [notifier]
+      summary: List the caller's notifications
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { $ref: '#/components/parameters/Limit' }
+        - { $ref: '#/components/parameters/Offset' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - properties:
+                      data:
+                        type: array
+                        items: { $ref: '#/components/schemas/Notification' }
+
+  /notifications/{id}/read:
+    parameters: [{ $ref: '#/components/parameters/IdPath' }]
+    patch:
+      tags: [notifier]
+      summary: Mark a notification as read
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - properties: { data: { $ref: '#/components/schemas/Notification' } }
+        '404': { $ref: '#/components/responses/Error' }
+
+  # ── reference (3006) ───────────────────────────────────────────────────────
+  /reference/syndromes:
+    get:
+      tags: [reference]
+      summary: List / search syndromes
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { $ref: '#/components/parameters/Limit' }
+        - { $ref: '#/components/parameters/Offset' }
+        - name: search
+          in: query
+          required: false
+          schema: { type: string }
+          description: Free-text filter on syndrome name/description.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - properties:
+                      data:
+                        type: array
+                        items: { $ref: '#/components/schemas/Syndrome' }
+
+  /reference/syndromes/{id}:
+    parameters: [{ $ref: '#/components/parameters/IdPath' }]
+    get:
+      tags: [reference]
+      summary: Get a syndrome with its linked HPO terms
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - properties: { data: { $ref: '#/components/schemas/SyndromeDetail' } }
+        '404': { $ref: '#/components/responses/Error' }
+
+  /reference/hpo/search:
+    get:
+      tags: [reference]
+      summary: Search HPO (Human Phenotype Ontology) terms
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema: { type: string }
+          example: micro
+        - { $ref: '#/components/parameters/Limit' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - properties:
+                      data:
+                        type: array
+                        items: { $ref: '#/components/schemas/HpoTerm' }
+
+  # ── billing (3007) ─────────────────────────────────────────────────────────
+  /billing/plans:
+    get:
+      tags: [billing]
+      summary: List subscription plans
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - properties:
+                      data:
+                        type: array
+                        items: { $ref: '#/components/schemas/Plan' }
+
+  /billing/subscribe:
+    post:
+      tags: [billing]
+      summary: Subscribe a lab to a plan
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [lab_id, plan_id]
+              properties:
+                lab_id: { type: string, format: uuid }
+                plan_id: { type: string, format: uuid }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - properties: { data: { $ref: '#/components/schemas/Subscription' } }
+
+  /billing/usage/{lab_id}:
+    parameters:
+      - name: lab_id
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    get:
+      tags: [billing]
+      summary: Get a lab's current usage
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - properties: { data: { $ref: '#/components/schemas/UsageInfo' } }
+
+  /billing/check-quota:
+    post:
+      tags: [billing]
+      summary: Check whether a lab is within quota
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [lab_id]
+              properties:
+                lab_id: { type: string, format: uuid }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - properties: { data: { $ref: '#/components/schemas/QuotaCheck' } }
+
+# ───────────────────────────────────────────────────────────────────────────
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    Limit:
+      name: limit
+      in: query
+      required: false
+      schema: { type: integer, default: 20, minimum: 1, maximum: 100 }
+    Offset:
+      name: offset
+      in: query
+      required: false
+      schema: { type: integer, default: 0, minimum: 0 }
+    IdPath:
+      name: id
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+
+  responses:
+    Error:
+      description: Error envelope
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Envelope' }
+    OkEmpty:
+      description: Success envelope with null data
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Envelope' }
+
+  schemas:
+    Envelope:
+      type: object
+      description: Standard response wrapper used by every endpoint.
+      required: [status]
+      properties:
+        status: { type: string, enum: [ok, error], example: ok }
+        data: { description: Payload (shape varies by endpoint), nullable: true }
+        error: { type: string, nullable: true, example: null }
+
+    Role:
+      type: string
+      enum: [doctor, lab, admin]
+
+    CaseStatus:
+      type: string
+      enum: [pending, processing, completed, failed]
+
+    RegisterRequest:
+      type: object
+      required: [email, password, role, name]
+      properties:
+        email: { type: string, format: email }
+        password: { type: string, format: password, minLength: 8 }
+        role: { $ref: '#/components/schemas/Role' }
+        name: { type: string }
+        organization: { type: string, nullable: true }
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email: { type: string, format: email }
+        password: { type: string, format: password }
+
+    AuthTokens:
+      type: object
+      properties:
+        access_token: { type: string }
+        refresh_token: { type: string, format: uuid }
+        token_type: { type: string, example: Bearer }
+        expires_in: { type: integer, example: 3600 }
+
+    User:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        email: { type: string, format: email }
+        role: { $ref: '#/components/schemas/Role' }
+        name: { type: string }
+        organization: { type: string, nullable: true }
+
+    CreateCaseRequest:
+      type: object
+      properties:
+        patient_name: { type: string, nullable: true }
+        patient_age: { type: integer, nullable: true }
+        patient_ethnicity: { type: string, nullable: true }
+
+    CreateCaseResponse:
+      type: object
+      properties:
+        case_id: { type: string, format: uuid }
+        upload_url: { type: string, format: uri, description: Presigned S3 PUT URL (15-min TTL) }
+        image_key: { type: string }
+
+    Case:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        user_id: { type: string, format: uuid }
+        patient_name: { type: string, nullable: true }
+        patient_age: { type: integer, nullable: true }
+        patient_ethnicity: { type: string, nullable: true }
+        image_key: { type: string }
+        status: { $ref: '#/components/schemas/CaseStatus' }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+
+    Diagnosis:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        case_id: { type: string, format: uuid }
+        syndrome_id: { type: string, format: uuid, nullable: true }
+        syndrome_name: { type: string }
+        confidence: { type: number, format: double, example: 0.87 }
+        rank: { type: integer, example: 1 }
+        created_at: { type: string, format: date-time }
+
+    CaseWithDiagnoses:
+      allOf:
+        - $ref: '#/components/schemas/Case'
+        - type: object
+          properties:
+            diagnoses:
+              type: array
+              items: { $ref: '#/components/schemas/Diagnosis' }
+
+    Batch:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        lab_id: { type: string, format: uuid }
+        status: { $ref: '#/components/schemas/CaseStatus' }
+        total_items: { type: integer }
+        processed_items: { type: integer }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+
+    BatchItem:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        batch_id: { type: string, format: uuid }
+        image_key: { type: string }
+        case_id: { type: string, format: uuid, nullable: true }
+        status: { $ref: '#/components/schemas/CaseStatus' }
+        created_at: { type: string, format: date-time }
+
+    BatchWithItems:
+      type: object
+      properties:
+        batch: { $ref: '#/components/schemas/Batch' }
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/BatchItem' }
+
+    DiagnosisEntry:
+      type: object
+      properties:
+        syndrome_id: { type: string, format: uuid }
+        syndrome_name: { type: string }
+        confidence: { type: number, format: double }
+        rank: { type: integer }
+
+    AnalysisResult:
+      type: object
+      properties:
+        request_id: { type: string, format: uuid }
+        case_id: { type: string, format: uuid }
+        source: { type: string, enum: [doctor, lab] }
+        batch_id: { type: string, format: uuid, nullable: true }
+        top_diagnoses:
+          type: array
+          items: { $ref: '#/components/schemas/DiagnosisEntry' }
+        processing_time_ms: { type: integer }
+        completed_at: { type: string, format: date-time }
+
+    Notification:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        user_id: { type: string, format: uuid }
+        type: { type: string, example: analysis_complete }
+        title: { type: string }
+        body: { type: string, nullable: true }
+        read: { type: boolean }
+        metadata: { type: object, additionalProperties: true, nullable: true }
+        created_at: { type: string, format: date-time }
+
+    Syndrome:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        omim_id: { type: string, nullable: true }
+        description: { type: string, nullable: true }
+        prevalence: { type: string, nullable: true }
+        inheritance: { type: string, nullable: true }
+        created_at: { type: string, format: date-time }
+
+    HpoTerm:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        hpo_id: { type: string, example: "HP:0000252" }
+        name: { type: string }
+        definition: { type: string, nullable: true }
+
+    SyndromeDetail:
+      allOf:
+        - $ref: '#/components/schemas/Syndrome'
+        - type: object
+          properties:
+            hpo_terms:
+              type: array
+              items: { $ref: '#/components/schemas/HpoTerm' }
+
+    Plan:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string, example: bronze }
+        monthly_limit: { type: integer, example: 40 }
+        overage_price_cents: { type: integer, example: 5000 }
+        created_at: { type: string, format: date-time }
+
+    Subscription:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        lab_id: { type: string, format: uuid }
+        plan_id: { type: string, format: uuid }
+        status: { type: string, example: active }
+        started_at: { type: string, format: date-time }
+
+    UsageInfo:
+      type: object
+      properties:
+        lab_id: { type: string, format: uuid }
+        month: { type: string, format: date, example: "2026-05-01" }
+        plan_name: { type: string, example: bronze }
+        monthly_limit: { type: integer }
+        current_usage: { type: integer }
+        remaining: { type: integer }
+
+    QuotaCheck:
+      type: object
+      properties:
+        allowed: { type: boolean }
+        remaining: { type: integer }
+        monthly_limit: { type: integer }
+        current_usage: { type: integer }
