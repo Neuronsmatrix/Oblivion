@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Phenograph / Oblivion — отчёт о продукте</title>
+<style>
+  body {
+    font-family: "Liberation Serif", Georgia, "Times New Roman", serif;
+    color: #15282f;
+    line-height: 1.5;
+    font-size: 12pt;
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  h1 { font-size: 26pt; color: #114643; line-height: 1.15; margin: 0 0 4pt 0; }
+  h2 { font-size: 18pt; color: #114643; border-bottom: 2px solid #068176; padding-bottom: 3pt; margin-top: 26pt; }
+  h3 { font-size: 14pt; color: #15282f; margin-top: 18pt; }
+  h4 { font-size: 12pt; color: #475d2e; margin-top: 14pt; margin-bottom: 4pt; }
+  p { margin: 6pt 0; text-align: justify; }
+  .lead { font-size: 13pt; color: #3a4a50; }
+  .muted { color: #6a757a; }
+  code, .mono { font-family: "Liberation Mono", "Courier New", monospace; font-size: 10.5pt; background: #f1ede3; padding: 0 2px; }
+  pre { font-family: "Liberation Mono", "Courier New", monospace; font-size: 9pt; line-height: 1.35;
+        background: #f6f3ea; border: 1px solid #d8d2c4; border-left: 3px solid #068176;
+        padding: 8pt 10pt; margin: 8pt 0; white-space: pre-wrap; word-break: break-word; color: #15282f; }
+  .codecap { font-family: "Liberation Sans", Arial, sans-serif; font-size: 9pt; color: #6a757a; margin: 8pt 0 2pt 0; }
+  table { border-collapse: collapse; width: 100%; margin: 10pt 0; font-size: 10.5pt; }
+  th, td { border: 1px solid #c9c2b2; padding: 4pt 6pt; text-align: left; vertical-align: top; }
+  th { background: #114643; color: #ffffff; font-family: "Liberation Sans", Arial, sans-serif; }
+  tr:nth-child(even) td { background: #f6f3ea; }
+  figure { margin: 12pt 0; text-align: center; }
+  figure img { border: 1px solid #d8d2c4; }
+  figcaption { font-family: "Liberation Sans", Arial, sans-serif; font-size: 9.5pt; color: #6a757a; margin-top: 3pt; text-align: center; }
+  ul, ol { margin: 6pt 0 6pt 0; padding-left: 22pt; }
+  li { margin: 3pt 0; text-align: justify; }
+  blockquote { border-left: 3px solid #068176; margin: 10pt 0; padding: 4pt 12pt; background: #f6f3ea; color: #3a4a50; }
+  .tag { font-family: "Liberation Sans", Arial, sans-serif; font-size: 9pt; background: #e6e1d4; color: #475d2e; padding: 1px 6px; border-radius: 8px; }
+  .warn { background: #f4dad3; border-left: 3px solid #8a3a2e; padding: 6pt 12pt; margin: 10pt 0; }
+  .ok { background: #e8efdd; border-left: 3px solid #3f7a3a; padding: 6pt 12pt; margin: 10pt 0; }
+  table.callout { margin: 12pt 0; }
+  table.callout td { border: 1px solid; padding: 7pt 11pt; font-size: 11.5pt; text-align: justify; }
+  table.callout td p { margin: 4pt 0; }
+  table.callout td ul { margin: 4pt 0; }
+  table.warn-c td { background: #f4dad3; border-color: #8a3a2e; }
+  table.ok-c td { background: #e8efdd; border-color: #3f7a3a; }
+  .cover { text-align: center; padding: 40pt 0 20pt 0; }
+  .cover .sub { font-size: 14pt; color: #068176; font-family: "Liberation Sans", Arial, sans-serif; letter-spacing: 1px; }
+  .toc { font-family: "Liberation Sans", Arial, sans-serif; font-size: 11pt; }
+  .toc li { margin: 2pt 0; }
+  hr { border: none; border-top: 1px solid #d8d2c4; margin: 20pt 0; }
+  .pb { page-break-before: always; }
+  .small { font-size: 10pt; }
+</style>
+</head>
+<body>
+
+<!-- ───────────────────────── ОБЛОЖКА ───────────────────────── -->
+<div class="cover">
+  <div class="sub">PHENOGRAPH · OBLIVION</div>
+  <h1>Компьютерная дисморфология:<br>распознавание генетических синдромов по лицу</h1>
+  <p class="lead">Отчёт о продукте и технической реализации (MVP)</p>
+  <p class="muted small">Платформа: <code>frontend.rusted-apple.com</code> · API: <code>api.rusted-apple.com</code><br>
+  Дата: 30 мая 2026 г. · Статус: MVP, развёрнут в продакшн-окружении</p>
+</div>
+
+<blockquote class="small">
+<strong>О документе.</strong> Это сводный отчёт о продукте Phenograph (внутреннее кодовое имя бэкенда — <em>Oblivion</em>).
+Описание архитектуры опирается на проектные материалы из каталога <code>design/</code> (целевое видение системы),
+а описание реализации — на фактический исходный код репозитория и на наблюдения, сделанные на живом стенде.
+Все экранные снимки получены с работающего развёрнутого приложения. Документ намеренно честно разграничивает
+<em>реализованное</em>, <em>частично реализованное</em> и <em>целевое</em>.
+</blockquote>
+
+<h2>Содержание</h2>
+<ol class="toc">
+  <li>Краткое резюме</li>
+  <li>Контекст и рыночная возможность</li>
+  <li>Продукт: возможности и пользовательские сценарии</li>
+  <li>Архитектура системы</li>
+  <li>Бэкенд: микросервисы и данные</li>
+  <li>Ядро распознавания (ML): текущее состояние и цель</li>
+  <li>Фронтенд: Phenograph SPA</li>
+  <li>Безопасность</li>
+  <li>Развёртывание MVP</li>
+  <li>Текущие ограничения и известные проблемы</li>
+  <li>Дорожная карта</li>
+  <li>Приложения (полная карта API, каталог синдромов, доступы)</li>
+</ol>
+
+<!-- ───────────────────────── 1. РЕЗЮМЕ ───────────────────────── -->
+<h2 class="pb">1. Краткое резюме</h2>
+
+<p><strong>Phenograph</strong> — это платформа поддержки клинических решений для медицинской генетики.
+По одной фотографии лица пациента система выделяет морфологические признаки и формирует
+ранжированный список наиболее вероятных генетических синдромов, связанных с онтологией
+человеческого фенотипа (Human Phenotype Ontology, HPO). По сути это русско-/локально-ориентированный
+функциональный аналог мирового лидера рынка — Face2Gene (компания FDNA).</p>
+
+<p>Продукт обслуживает <strong>две роли пользователей</strong> по проверенной бизнес-модели Face2Gene:</p>
+<ul>
+  <li><strong>Врач-генетик</strong> — создаёт клинические кейсы, загружает изображение, получает дифференциальный
+  диагноз (ранжированный список синдромов с оценками), работает со справочником синдромов и HPO.</li>
+  <li><strong>Лаборатория</strong> — пакетная (batch) обработка изображений, подписки и тарифы, учёт потребления.</li>
+</ul>
+
+<p><strong>Технически</strong> система построена как набор из <strong>7 независимых микросервисов на Rust (фреймворк Axum)</strong>
+с асинхронной обработкой через <strong>Apache Kafka</strong> и одностраничным фронтендом (SPA) на <strong>React</strong>.
+Сервисы спрятаны за единым API-шлюзом (nginx). Хранилища: PostgreSQL, Redis, объектное хранилище MinIO (S3),
+Elasticsearch.</p>
+
+<table style="width:100%;border-collapse:collapse;margin:12pt 0;"><tr><td style="background:#f4dad3;border:1px solid #8a3a2e;padding:8pt 12pt;text-align:justify;">
+<strong>Ключевая оговорка.</strong> На текущем этапе MVP <strong>само распознавание — это заглушка (stub)</strong>:
+сервис <code>recognition</code> игнорирует содержимое изображения и возвращает случайный top-10 синдромов из каталога
+на 50 позиций после имитации задержки «инференса» в 0,5–2 с. При этом <em>контракты сообщений и весь конвейер
+обработки — промышленного качества</em>, поэтому замена заглушки на реальную ML-модель не требует переделки остальной системы.
+</td></tr></table>
+
+<h4>Ключевые цифры реализации</h4>
+<table>
+  <tr><th>Параметр</th><th>Значение</th></tr>
+  <tr><td>Микросервисов (Rust/Axum)</td><td>7 + общая библиотека <code>oblivion-common</code></td></tr>
+  <tr><td>Схем в PostgreSQL</td><td>6 (auth, cases, labs, billing, notifier, reference)</td></tr>
+  <tr><td>HTTP-операций API</td><td>24 бизнес-операции + health-проверки</td></tr>
+  <tr><td>Топиков Kafka</td><td>3 рабочих (<code>analysis.requests</code>, <code>analysis.results</code>, <code>notifications</code>)</td></tr>
+  <tr><td>Синдромов в каталоге распознавания</td><td>50 (со стабильными UUID)</td></tr>
+  <tr><td>Справочные данные</td><td>50 синдромов + 100 HPO-терминов (сид)</td></tr>
+  <tr><td>Статус развёртывания</td><td>Живой стенд (frontend + API + TLS), демо-доступы засеяны</td></tr>
+</table>
+
+<!-- ───────────────────────── 2. РЫНОК ───────────────────────── -->
+<h2 class="pb">2. Контекст и рыночная возможность</h2>
+
+<p>Рынок распознавания генетических заболеваний по изображению лица <strong>консолидирован вокруг единственного
+лидера — FDNA с продуктом Face2Gene</strong>. Им пользуются около 70% генетиков мира в более чем 10 000 медицинских
+центрах 130 стран. Алгоритм DeepGestalt показывает 91% точности попадания в первую десятку диагнозов (Nature Medicine, 2019);
+база содержит свыше 150 000 изображений и более 5 000 заболеваний.</p>
+
+<p><strong>Бизнес-модель Face2Gene</strong> — фримиум с сетевым эффектом: приложение CLINIC бесплатно для врачей
+(в обмен на данные для обучения), монетизация — через продукт LABS для лабораторий по тарифной сетке:</p>
+
+<table>
+  <tr><th>Тариф</th><th>Кейсов в месяц</th><th>Превышение</th></tr>
+  <tr><td>Bronze</td><td>40</td><td>$50/кейс</td></tr>
+  <tr><td>Silver</td><td>80</td><td>$50/кейс</td></tr>
+  <tr><td>Gold</td><td>145</td><td>$50/кейс</td></tr>
+  <tr><td>Platinum</td><td>300</td><td>$50/кейс</td></tr>
+  <tr><td>Bundle</td><td>40–300</td><td>$40/кейс</td></tr>
+</table>
+
+<p class="small muted">Именно эта сетка тарифов воспроизведена в биллинг-сервисе Phenograph (см. раздел 5).</p>
+
+<p><strong>Рыночная возможность для Phenograph.</strong> В России и СНГ собственных решений в области
+фенотипирования по лицу <strong>не существует</strong>. Face2Gene используется отдельными генетиками в индивидуальном
+порядке, а <strong>главным барьером для распространения называют отсутствие русскоязычного интерфейса</strong>.
+Сегмент ИИ-диагностики редких заболеваний растёт темпами ~29% в год и достигнет ≈$5,5 млрд к 2029 г.
+Phenograph позиционируется как локализованный аналог с той же двусторонней бизнес-моделью (бесплатно врачам,
+платно лабораториям) и потенциалом первопроходца на недооохваченном рынке.</p>
+
+<blockquote class="small">Полный конкурентный и рыночный анализ приведён в исходном материале
+<code>design/compass_artifact…md</code> и не дублируется здесь целиком.</blockquote>
+
+<!-- ───────────────────────── 3. ПРОДУКТ ───────────────────────── -->
+<h2 class="pb">3. Продукт: возможности и пользовательские сценарии</h2>
+
+<p>Ниже — обзор реального интерфейса, снятый с работающего стенда <code>frontend.rusted-apple.com</code>.
+Приложение распознаёт роль пользователя (врач / лаборатория) и показывает соответствующую навигацию.</p>
+
+<h3>3.1. Маркетинговый лендинг</h3>
+<p>Публичная посадочная страница выполнена как «кинематографичный» прокручиваемый рассказ из трёх актов
+(двойная спираль ДНК → лицевая сетка из ориентиров → панель доказательной базы), за которым следуют блок
+возможностей и блок доказательств. Визуальный язык — сдержанный, «клинический», с акцентом на доверие
+(бейджи HIPAA / SOC 2 / GDPR, формулировка «Not a diagnostic device. Clinical decision support only»).</p>
+
+<figure><img src="screenshots/01-landing-hero.png" width="660">
+<figcaption>Рис. 1 — Главный экран лендинга: «Phenotype, precisely read.» с анимированной спиралью ДНК.</figcaption></figure>
+
+<figure><img src="screenshots/02-landing-features.png" width="660">
+<figcaption>Рис. 2 — Блок возможностей: фенотипирование по ориентирам, ранжирование синдромов, клинический workflow.</figcaption></figure>
+
+<figure><img src="screenshots/03-landing-evidence.png" width="660">
+<figcaption>Рис. 3 — Блок доказательной базы.</figcaption></figure>
+
+<table style="width:100%;border-collapse:collapse;margin:12pt 0;"><tr><td class="small" style="background:#f4dad3;border:1px solid #8a3a2e;padding:8pt 12pt;text-align:justify;"><strong>Важно для отчёта.</strong> Цифры на лендинге (точность 92% top-5, 4 317 синдромов,
+12 000+ подтверждённых случаев, 17 публикаций, 41 учреждение) — это <strong>маркетинговые заявления, отражающие
+целевое видение продукта, а не текущую реализацию</strong>. Фактический MVP-бэкенд оперирует каталогом на 50 синдромов
+и использует заглушку распознавания (см. раздел 6).</td></tr></table>
+
+<h3>3.2. Аутентификация</h3>
+<p>Вход и регистрация по e-mail и паролю. Доступ к рабочему пространству ограничен (защищённые маршруты).
+После входа access-токен (JWT) хранится в браузере и автоматически обновляется по refresh-токену при истечении.</p>
+
+<figure><img src="screenshots/04-login.png" width="520">
+<figcaption>Рис. 4 — Экран входа в клиническое рабочее пространство.</figcaption></figure>
+
+<h3>3.3. Сценарий врача</h3>
+<p>Домашний экран врача — список кейсов с фильтрами по статусу (все / в обработке / завершён / ошибка)
+и таблицей: пациент, возраст, статус, дата.</p>
+
+<figure><img src="screenshots/05-doctor-cases.png" width="660">
+<figcaption>Рис. 5 — Рабочее пространство врача: список клинических кейсов.</figcaption></figure>
+
+<p>Создание нового анализа: метаданные пациента → загрузка изображения по защищённой (presigned) ссылке напрямую
+в объектное хранилище → подтверждение загрузки запускает асинхронный анализ.</p>
+
+<figure><img src="screenshots/07-doctor-new-analysis.png" width="560">
+<figcaption>Рис. 6 — Мастер создания кейса и загрузки изображения («New analysis»).</figcaption></figure>
+
+<p><strong>Ключевой экран продукта — карточка кейса</strong> с результатом. Слева — абстрактная визуализация лицевой
+сетки из ориентиров (фотография пациента принципиально не отображается — «For privacy, the patient photograph is never
+rendered»). Справа — ранжированный список из 10 синдромов-кандидатов с апостериорными оценками и индикаторами
+уверенности.</p>
+
+<figure><img src="screenshots/06-doctor-case-detail.png" width="660">
+<figcaption>Рис. 7 — Карточка завершённого кейса: лицевая сетка + дифференциальный диагноз (top-10).</figcaption></figure>
+
+<h3>3.4. Справочник синдромов и атлас признаков (HPO)</h3>
+<p>Раздел доступен обеим ролям. Справочник синдромов — поиск и постраничный просмотр; карточка синдрома содержит
+описание, OMIM-идентификатор, распространённость, тип наследования и связанные HPO-термины. Отдельный «атлас
+признаков» — поиск по терминам Human Phenotype Ontology.</p>
+
+<figure><img src="screenshots/08-syndromes-list.png" width="660">
+<figcaption>Рис. 8 — Справочник синдромов с поиском.</figcaption></figure>
+
+<figure><img src="screenshots/09-syndrome-detail.png" width="560">
+<figcaption>Рис. 9 — Карточка синдрома с описанием и связанными HPO-признаками.</figcaption></figure>
+
+<figure><img src="screenshots/10-hpo-atlas.png" width="660">
+<figcaption>Рис. 10 — Атлас признаков (поиск по HPO), пример запроса «hypertelorism».</figcaption></figure>
+
+<h3>3.5. Сценарий лаборатории</h3>
+<p>Лаборатория работает с пакетами (batch) изображений: постановка изображений в очередь, отправка батча,
+просмотр результатов по мере обработки, помесячный учёт потребления и выбор тарифа. Навигация лаборатории
+отличается от врачебной (Batches, New batch, Usage, Billing).</p>
+
+<figure><img src="screenshots/13-lab-new-batch.png" width="560">
+<figcaption>Рис. 11 — Лаборатория: создание нового пакета (batch) изображений.</figcaption></figure>
+
+<figure><img src="screenshots/14-lab-batches.png" width="660">
+<figcaption>Рис. 12 — Лаборатория: список пакетов.</figcaption></figure>
+
+<p class="small muted">Замечание: на живом стенде у демо-лаборатории отсутствует активная подписка, а биллинг-страница
+в текущей сборке падает; в результате лабораторный/монетизационный сценарий не воспроизводится полностью end-to-end.
+Подробности — в разделе 10.</p>
+
+<h3>3.6. Уведомления и профиль</h3>
+<p>Уведомления формируются автоматически (например, «анализ готов») и отображаются в приложении с возможностью
+отметить прочитанным. Профиль показывает данные учётной записи.</p>
+
+<figure><img src="screenshots/11-notifications.png" width="660">
+<figcaption>Рис. 13 — Центр уведомлений.</figcaption></figure>
+
+<figure><img src="screenshots/12-profile.png" width="660">
+<figcaption>Рис. 14 — Профиль пользователя (только просмотр — см. раздел 10).</figcaption></figure>
+
+<!-- ───────────────────────── 4. АРХИТЕКТУРА ───────────────────────── -->
+<h2 class="pb">4. Архитектура системы</h2>
+
+<h3>4.1. Целевая архитектура (видение)</h3>
+<p>Проектные материалы (<code>design/</code>) описывают целевую облачную архитектуру: клиенты (web на React,
+мобильное приложение на Flutter, Labs API по REST/gRPC) → пограничный слой (CDN, балансировщик) →
+кластер Kubernetes с API-шлюзом (Kong/Traefik) и ограничителем запросов → микросервисы (Core: Auth, Case, Labs;
+Async: Recognition на GPU, Notifier; Support: Reference, Billing) → шина Apache Kafka → хранилища
+(PostgreSQL, S3/MinIO, Redis, Elasticsearch, векторная БД эмбеддингов лица, реестр моделей MLflow) →
+наблюдаемость (Prometheus, Grafana, Jaeger, ELK).</p>
+
+<p class="muted small">Диаграмма целевой архитектуры приведена в проектных материалах <code>design/</code> и здесь не дублируется.</p>
+
+<p>Ключевые потоки данных в целевой модели:</p>
+<ul>
+  <li><strong>Создание кейса врачом:</strong> клиент → шлюз → Case Service → PostgreSQL + S3 → Kafka (<code>analysis.requests</code>).</li>
+  <li><strong>Анализ изображения:</strong> Kafka → Recognition Service → векторная БД → Kafka (<code>analysis.results</code>) → Case Service.</li>
+  <li><strong>Пакет лаборатории:</strong> Labs API → шлюз → Labs Service → Kafka → Recognition → результат.</li>
+  <li><strong>Уведомления:</strong> Kafka (<code>notifications</code>) → Notifier → Email/Push/Webhook.</li>
+</ul>
+
+<h3>4.2. Реализованная архитектура и развёртывание в Kubernetes</h3>
+<p>Платформа реализована как 7 независимых сервисов на Rust/Axum за единым API-шлюзом (nginx), с инфраструктурой
+PostgreSQL / Apache Kafka / Redis / MinIO / Elasticsearch. Для продакшна <strong>подготовлены и проверены манифесты
+Kubernetes</strong>: сервисы разворачиваются как Deployments за Ingress (TLS), а stateful-компоненты (БД, шина,
+хранилища) — как StatefulSets/Deployments внутри кластера. Это приближает реализацию к целевой архитектуре из §4.1.</p>
+
+<table style="width:100%;border-collapse:collapse;margin:12pt 0;"><tr><td style="background:#e8efdd;border:1px solid #3f7a3a;padding:8pt 12pt;">
+<strong>Статус развёртывания.</strong> Манифесты Kubernetes готовы к продакшн-развёртыванию. Публичный
+<em>демо-стенд</em> <code>rusted-apple.com</code>, с которого сделаны экранные снимки, на момент подготовки отчёта
+работает на упрощённом одномашинном варианте (systemd-юниты + Docker-инфраструктура, скрипт <code>deploy.sh</code>) —
+см. §9.
+</td></tr></table>
+
+<figure><img src="screenshots/arch-02-asbuilt.png" width="700">
+<figcaption>Рис. 15 — Развёртывание в Kubernetes (манифесты подготовлены). Красным выделена заглушка распознавания.</figcaption></figure>
+
+<table>
+  <tr><th>Слой</th><th>Реализация</th></tr>
+  <tr><td>Клиент</td><td>React SPA (Phenograph), <code>frontend.rusted-apple.com</code></td></tr>
+  <tr><td>Вход в кластер</td><td>Ingress + TLS (демо-стенд: системный nginx + Let's Encrypt); CORS, rate-limit, заголовки безопасности (CSP/HSTS)</td></tr>
+  <tr><td>API-шлюз</td><td>nginx, маршрутизация по префиксу пути</td></tr>
+  <tr><td>Сервисы</td><td>7 сервисов Rust/Axum (порты 3001–3007) как <strong>Deployments</strong> (демо-стенд: systemd, <code>Restart=always</code>)</td></tr>
+  <tr><td>Шина сообщений</td><td>Apache Kafka 3.7</td></tr>
+  <tr><td>Хранилища</td><td>PostgreSQL 16, Redis 7, MinIO (S3), Elasticsearch 8 — как StatefulSets/тома в кластере</td></tr>
+</table>
+
+<h3>4.3. Сквозной поток анализа (end-to-end)</h3>
+<h4>Поток врача</h4>
+<ol>
+  <li><code>POST /cases</code> — создаётся кейс (статус <code>pending</code>), возвращается presigned-URL для загрузки.</li>
+  <li>Браузер кладёт изображение <code>PUT</code>-запросом прямо в MinIO/S3 (без участия сервера).</li>
+  <li><code>POST /cases/{id}/confirm-upload</code> — сервис проверяет наличие объекта (HEAD), переводит кейс в <code>processing</code>
+  и публикует <code>AnalysisRequest</code> в топик <code>analysis.requests</code>.</li>
+  <li>Recognition-сервис читает запрос из Kafka, имитирует инференс, публикует <code>AnalysisResult</code> в <code>analysis.results</code>.</li>
+  <li>Case-сервис потребляет результат: сохраняет ранжированные диагнозы, переводит кейс в <code>completed</code>,
+  публикует уведомление в <code>notifications</code>.</li>
+  <li>Notifier сохраняет уведомление в БД (и, при настроенном SMTP, отправляет письмо).</li>
+  <li>Фронтенд опрашивает <code>GET /cases/{id}</code> каждые 2 с, пока статус не станет <code>completed</code>, и показывает диагнозы.</li>
+</ol>
+
+<h4>Поток лаборатории</h4>
+<ol>
+  <li><code>POST /labs/batch</code> — проверка роли <code>lab</code> → ограничитель запросов (Redis) → проверка квоты в биллинге
+  → создание пакета и его элементов → по одному <code>AnalysisRequest</code> на каждое изображение (source = <code>lab</code>).</li>
+  <li>Recognition обрабатывает каждый запрос и возвращает результат с тем же <code>batch_id</code>.</li>
+  <li>Labs-сервис потребляет результаты (фильтруя <code>source = lab</code>), помечает элементы пакета как
+  <code>completed</code> и инкрементирует счётчик обработанных; когда обработаны все — пакет становится <code>completed</code>.</li>
+</ol>
+
+<!-- ───────────────────────── 5. БЭКЕНД ───────────────────────── -->
+<h2 class="pb">5. Бэкенд: микросервисы и данные</h2>
+
+<h3>5.1. Общие принципы</h3>
+<p>Все сервисы написаны на Rust поверх Axum и разделяют общую библиотеку <code>oblivion-common</code>, которая задаёт
+единые контракты:</p>
+<ul>
+  <li><strong>Единый JSON-конверт ответа</strong> <code>ApiResponse</code>:
+  <code>{ "status": "ok"|"error", "data": …|null, "error": …|null }</code>.</li>
+  <li><strong>Единый тип ошибки</strong> <code>ServiceError</code> с отображением на HTTP-коды
+  (404/400/401/403/409/500).</li>
+  <li><strong>Строго типизированные идентификаторы</strong> (UserId, CaseId, LabId, SyndromeId, BatchId).</li>
+  <li><strong>Доменные перечисления</strong> Role (doctor/lab/admin), AnalysisStatus, AnalysisSource.</li>
+  <li><strong>Константы топиков и структуры сообщений Kafka</strong> (<code>AnalysisRequest</code>, <code>AnalysisResult</code>,
+  <code>DiagnosisEntry</code>, <code>NotificationMessage</code>).</li>
+  <li><strong>Слой CORS</strong>, управляемый переменной <code>CORS_ALLOWED_ORIGIN</code>.</li>
+</ul>
+<p>Качество кода: запрещён <code>unsafe</code>, включён строгий линт (<code>clippy::pedantic</code>), модули покрыты
+юнит-тестами (сериализация контрактов, генератор диагнозов, биллинговая арифметика и т.д.).</p>
+
+<p class="codecap">Единый конверт ответа (<code>crates/oblivion-common</code>):</p>
+<pre>// один и тот же конверт возвращает каждый HTTP-эндпоинт платформы
+pub struct ApiResponse&lt;T: Serialize&gt; {
+    pub status: &amp;'static str,   // "ok" | "error"
+    pub data:   Option&lt;T&gt;,
+    pub error:  Option&lt;String&gt;,
+}
+impl&lt;T: Serialize&gt; ApiResponse&lt;T&gt; {
+    pub fn ok(data: T) -&gt; Self {
+        Self { status: "ok", data: Some(data), error: None }
+    }
+    pub fn error(msg: impl Into&lt;String&gt;) -&gt; Self {
+        Self { status: "error", data: None, error: Some(msg.into()) }
+    }
+}</pre>
+
+<p class="codecap">Контракты сообщений Kafka — общие для продюсеров и консьюмеров (интеграционный «костяк» системы):</p>
+<pre>pub struct AnalysisRequest {
+    pub request_id: Uuid,
+    pub case_id:    Uuid,
+    pub image_key:  String,            // ключ объекта в S3/MinIO
+    pub source:     AnalysisSource,    // Doctor | Lab
+    pub batch_id:   Option&lt;Uuid&gt;,
+    pub patient_ethnicity: Option&lt;String&gt;,
+    pub requested_at: DateTime&lt;Utc&gt;,
+}
+pub struct DiagnosisEntry {
+    pub syndrome_id:   Uuid,
+    pub syndrome_name: String,
+    pub confidence:    f64,   // [0.0, 1.0]
+    pub rank:          i32,   // 1 = наиболее вероятный
+}
+pub struct AnalysisResult {
+    pub request_id:    Uuid,
+    pub case_id:       Uuid,
+    pub source:        AnalysisSource,
+    pub batch_id:      Option&lt;Uuid&gt;,
+    pub top_diagnoses: Vec&lt;DiagnosisEntry&gt;,
+    pub processing_time_ms: u64,
+    pub completed_at:  DateTime&lt;Utc&gt;,
+}</pre>
+
+<h3>5.2. Карта сервисов</h3>
+<table>
+  <tr><th>Сервис</th><th>Порт</th><th>Назначение</th><th>Хранилища</th><th>Kafka</th></tr>
+  <tr><td><strong>auth</strong></td><td>3001</td><td>Регистрация, вход, JWT, refresh, профиль, выход</td><td>PostgreSQL, Redis</td><td>—</td></tr>
+  <tr><td><strong>case</strong></td><td>3002</td><td>CRUD кейсов, presigned-загрузка, запуск анализа, сохранение диагнозов</td><td>PostgreSQL, MinIO</td><td>publish requests / consume results / publish notifications</td></tr>
+  <tr><td><strong>labs</strong></td><td>3003</td><td>Пакеты лабораторий, результаты, потребление, тарифы</td><td>PostgreSQL, Redis</td><td>publish requests / consume results</td></tr>
+  <tr><td><strong>recognition</strong></td><td>3004</td><td>«Инференс» (заглушка): top-10 синдромов</td><td>— (каталог в коде)</td><td>consume requests / publish results</td></tr>
+  <tr><td><strong>notifier</strong></td><td>3005</td><td>Список уведомлений, отметка прочитанным, рассылка e-mail</td><td>PostgreSQL</td><td>consume notifications</td></tr>
+  <tr><td><strong>reference</strong></td><td>3006</td><td>Справочник синдромов и HPO, поиск</td><td>PostgreSQL, Elasticsearch</td><td>—</td></tr>
+  <tr><td><strong>billing</strong></td><td>3007</td><td>Тарифы, подписки, учёт потребления, проверка квоты</td><td>PostgreSQL, Redis</td><td>—</td></tr>
+</table>
+
+<h3>5.3. Сервисы подробно</h3>
+
+<h4>auth (3001)</h4>
+<p>Пароли хешируются <strong>Argon2id</strong>. При входе выдаётся пара токенов: короткоживущий access-JWT и
+refresh-токен (случайный UUID, в БД хранится его SHA-256-хеш). <code>POST /auth/refresh</code> выполняет
+<strong>ротацию</strong> (старый refresh удаляется, выдаётся новый). <code>DELETE /auth/logout</code> удаляет refresh из БД
+и помещает access в чёрный список Redis на остаток времени жизни. JWT подписывается RS256 (при наличии RSA-ключей)
+с откатом на HS256.</p>
+
+<p class="codecap">Хеширование пароля (Argon2id) и полезная нагрузка access-токена:</p>
+<pre>// регистрация: соль + Argon2id
+let salt = SaltString::generate(&amp;mut OsRng);
+let password_hash = Argon2::default()
+    .hash_password(body.password.as_bytes(), &amp;salt)?
+    .to_string();
+
+// полезная нагрузка RS256 JWT
+pub struct Claims {
+    pub sub:   String,   // UUID пользователя
+    pub email: String,
+    pub role:  String,   // "doctor" | "lab" | "admin"
+    pub exp:   usize,    // срок действия (Unix-время)
+    pub iat:   usize,
+}</pre>
+
+<h4>case (3002)</h4>
+<p>Сердце врачебного сценария. Создаёт кейс и генерирует presigned PUT-URL (окно 15 минут) для прямой загрузки в MinIO.
+На подтверждении проверяет наличие объекта (HEAD), переводит кейс в <code>processing</code> и публикует запрос в Kafka.
+Фоновый consumer на <code>analysis.results</code> сохраняет диагнозы, ставит статус <code>completed</code> и публикует уведомление.
+Проверка владения: кейс доступен только создавшему его пользователю.</p>
+
+<p class="codecap">Подтверждение загрузки запускает асинхронный анализ (<code>confirm_upload</code>):</p>
+<pre>let case = load_owned_case(&amp;state, auth.user_id, id).await?;
+if case.status != "pending" {
+    return Err(CaseError::InvalidState { current: case.status });
+}
+// объект действительно загружен в хранилище?
+if !s3::check_object_exists(&amp;state.s3, bucket, &amp;case.image_key).await? {
+    return Err(CaseError::ImageNotFound { key: case.image_key });
+}
+db::update_case_status(&amp;state.pool, id, "processing").await?;
+
+let request = AnalysisRequest {
+    request_id: Uuid::new_v4(),
+    case_id: id,
+    image_key: case.image_key,
+    source: AnalysisSource::Doctor,
+    batch_id: None,
+    patient_ethnicity: case.patient_ethnicity,
+    requested_at: Utc::now(),
+};
+kafka::publish_analysis_request(&amp;state.producer, request).await?;  // → analysis.requests</pre>
+
+<h4>labs (3003)</h4>
+<p>Принимает пакет ключей изображений, последовательно: проверяет роль <code>lab</code>, применяет
+<strong>ограничитель частоты</strong> (Redis, 10 запросов/мин на лабораторию), <strong>проверяет квоту</strong> через
+биллинг (с 30-секундным кэшем в Redis), создаёт пакет и элементы, публикует по одному запросу на изображение.
+Эндпоинты потребления и тарифов проксируют биллинг-сервис.</p>
+
+<h4>billing (3007)</h4>
+<p>Хранит тарифы (засеяны Bronze/Silver/Gold/Platinum/Bundle), подписки и помесячный учёт. <code>check-quota</code> —
+внутренний эндпоинт: при исчерпании квоты возвращает <code>429</code> с заголовком <code>Retry-After</code> (секунды до начала
+следующего месяца). Счётчик потребления дублируется в Redis (быстрый путь) и в PostgreSQL (источник истины).</p>
+
+<h4>recognition (3004)</h4>
+<p>См. отдельный раздел 6. Кратко: каталог 50 синдромов, случайный top-10, имитация задержки 0,5–2 с,
+прямой эндпоинт <code>POST /recognize</code> для тестов + основной режим — consumer Kafka.</p>
+
+<h4>notifier (3005)</h4>
+<p>Consumer топика <code>notifications</code>: сохраняет уведомление в БД и пытается отправить e-mail через SMTP
+(в dev-режиме <code>localhost:1025</code> — только логирует намерение). HTTP-эндпоинты: список уведомлений пользователя
+и отметка прочитанным.</p>
+
+<h4>reference (3006)</h4>
+<p>Справочные данные только для чтения. Полнотекстовый поиск сначала пробует Elasticsearch, при недоступности или
+пустом индексе <strong>прозрачно откатывается</strong> на <code>ILIKE</code> в PostgreSQL. Карточка синдрома отдаётся вместе со
+связанными HPO-терминами.</p>
+
+<h3>5.4. Модель данных</h3>
+<table>
+  <tr><th>Схема</th><th>Таблицы (ключевые поля)</th></tr>
+  <tr><td>auth</td><td><code>users</code> (email, password_hash, role, name, organization), <code>refresh_tokens</code> (token_hash, expires_at)</td></tr>
+  <tr><td>cases</td><td><code>cases</code> (user_id, patient_name/age/ethnicity, image_key, status), <code>diagnoses</code> (case_id, syndrome_name, confidence, rank)</td></tr>
+  <tr><td>labs</td><td><code>batches</code> (lab_id, status, total/processed_items), <code>batch_items</code> (batch_id, image_key, case_id, status)</td></tr>
+  <tr><td>billing</td><td><code>plans</code> (name, monthly_limit, overage_price_cents), <code>subscriptions</code> (lab_id, plan_id, status), <code>usage_records</code> (lab_id, month, count)</td></tr>
+  <tr><td>notifier</td><td><code>notifications</code> (user_id, type, title, body, read, metadata JSONB)</td></tr>
+  <tr><td>reference</td><td><code>syndromes</code> (name, omim_id, description, prevalence, inheritance), <code>hpo_terms</code> (hpo_id, name, definition, parent_id), <code>syndrome_hpo</code> (связка M:N)</td></tr>
+</table>
+
+<h3>5.5. API и шлюз</h3>
+<p>Все 24 операции описаны в рукописной спецификации <strong>OpenAPI 3.1</strong> (<code>docs/openapi.yaml</code>), к ней
+прилагается Swagger UI (в продакшн наружу не публикуется). Шлюз nginx маршрутизирует по префиксу:
+<code>/auth/</code>→auth, <code>/cases</code>→case, <code>/labs/</code>→labs, <code>/recognize</code>→recognition,
+<code>/notifications</code>→notifier, <code>/reference/</code>→reference, <code>/billing/</code>→billing; <code>/healthz</code> — liveness.
+Полная таблица операций — в Приложении A.</p>
+
+<!-- ───────────────────────── 6. ML ───────────────────────── -->
+<h2 class="pb">6. Ядро распознавания (ML): текущее состояние и цель</h2>
+
+<table style="width:100%;border-collapse:collapse;margin:12pt 0;"><tr><td style="background:#f4dad3;border:1px solid #8a3a2e;padding:8pt 12pt;text-align:justify;">
+<strong>Текущее состояние — заглушка (stub).</strong> Сервис <code>recognition</code> <em>не анализирует изображение</em>.
+Алгоритм: перемешать каталог из 50 синдромов, взять первые 10, присвоить им убывающие «оценки уверенности»
+(rank-1 — случайно из диапазона [0,30; 0,95), каждый следующий — умножение на множитель из [0,50; 0,90),
+что гарантирует строгое убывание), вернуть результат. Перед ответом — имитация задержки инференса 0,5–2 с.
+</td></tr></table>
+
+<p class="codecap">Ядро «инференса» MVP (<code>recognition/generator.rs</code>) — именно эту функцию заменит реальная модель:</p>
+<pre>pub fn generate_random_diagnoses(syndromes: &amp;[SyndromeInfo]) -&gt; Vec&lt;DiagnosisEntry&gt; {
+    let mut rng = rand::rng();
+    let mut pool: Vec&lt;&amp;SyndromeInfo&gt; = syndromes.iter().collect();
+    pool.shuffle(&amp;mut rng);                              // перемешать каталог (изображение НЕ анализируется)
+    let mut confidence = rng.random_range(0.30..0.95);   // оценка для ранга 1
+
+    pool.iter().take(10).enumerate().map(|(i, s)| {
+        if i &gt; 0 {
+            confidence *= rng.random_range(0.50..0.90);  // каждый следующий ранг строго ниже
+        }
+        DiagnosisEntry {
+            syndrome_id:   s.id,
+            syndrome_name: s.name.to_string(),
+            confidence,
+            rank: (i + 1) as i32,
+        }
+    }).collect()
+}</pre>
+
+<p>Это сознательное и честное проектное решение для MVP: оно позволяет полностью продемонстрировать
+<strong>сквозной асинхронный конвейер</strong> (загрузка → очередь → обработка → результат → уведомление → отображение),
+не дожидаясь готовности обученной модели. Каталог из 50 синдромов использует <em>стабильные UUID</em>
+(<code>Uuid::from_u128(1..=50)</code>), совпадающие с идентификаторами в справочной БД, поэтому результат корректно
+ссылается на карточки синдромов.</p>
+
+<p><strong>Почему замена модели не потребует переделки системы.</strong> Контракт сообщений уже промышленный:
+<code>AnalysisRequest</code> несёт ключ изображения, источник, опционально этничность пациента; <code>AnalysisResult</code> —
+список <code>DiagnosisEntry</code> (syndrome_id, name, confidence ∈ [0,1], rank) и время обработки. Реальной модели
+достаточно подменить функцию генерации диагнозов внутри того же consumer-цикла — остальные сервисы, БД и фронтенд
+останутся без изменений.</p>
+
+<h4>Целевая модель (видение)</h4>
+<p>В целевой архитектуре Recognition работает на GPU-узлах, использует векторную БД эмбеддингов лица и реестр моделей
+(MLflow). По данным рыночного анализа, для конкурентоспособной модели потребуются: ≥17 000 изображений,
+покрытие 200+ синдромов, этническое разнообразие выборки, клиническая валидация (целевая точность top-10 ≈ 90%+)
+и публикации. Это — основной предмет следующего этапа разработки.</p>
+
+<!-- ───────────────────────── 7. ФРОНТЕНД ───────────────────────── -->
+<h2 class="pb">7. Фронтенд: Phenograph SPA</h2>
+
+<h3>7.1. Технологический стек</h3>
+<table>
+  <tr><th>Область</th><th>Технология</th></tr>
+  <tr><td>Каркас</td><td>React 19, Vite 8, TypeScript 6 (строгий режим)</td></tr>
+  <tr><td>Маршрутизация</td><td>React Router 7</td></tr>
+  <tr><td>Серверное состояние</td><td>TanStack Query (React Query) 5 — кэш, поллинг, инвалидация</td></tr>
+  <tr><td>Валидация форм</td><td>Zod 4 (без отдельной form-библиотеки)</td></tr>
+  <tr><td>Моки API</td><td>MSW 2 (Mock Service Worker) — демо без бэкенда</td></tr>
+  <tr><td>Иконки / стили</td><td>Lucide; чистый CSS с дизайн-токенами (без Tailwind/CSS-in-JS)</td></tr>
+</table>
+
+<h3>7.2. Архитектура клиента</h3>
+<ul>
+  <li><strong>API-клиент</strong> (<code>lib/api</code>): обёртка <code>apiFetch</code> разворачивает конверт <code>ApiResponse</code>,
+  подставляет Bearer-токен и при <code>401</code> выполняет <strong>единый (single-flight) refresh</strong> с повтором запроса;
+  параллельные 401 разделяют один промис обновления.</li>
+  <li><strong>Состояние данных</strong>: хуки React Query на каждую предметную область; кейсы и пакеты в обработке
+  <strong>опрашиваются каждые 2 с</strong>; уведомления — каждые 30 с.</li>
+  <li><strong>Аутентификация</strong> (<code>AuthContext</code>): токены в <code>localStorage</code>; на старте — попытка
+  <code>/auth/me</code> с авто-обновлением; маршруты защищены охранниками (ProtectedRoute / PublicOnlyRoute / RoleRoute),
+  навигация и домашний экран зависят от роли (врач → /app/cases, лаборатория → /app/usage).</li>
+  <li><strong>Демо-режим</strong>: при <code>VITE_USE_MOCKS=true</code> MSW перехватывает запросы и обслуживает их из
+  встроенной in-memory БД (кейсы авто-проходят pending → processing → completed). В продакшн-сборке моки выключены.</li>
+</ul>
+
+<h3>7.3. Дизайн-система</h3>
+<p>Визуальная идентичность задана набором CSS-токенов. Палитра — «природная», сдержанно-клиническая:</p>
+<table>
+  <tr><th>Токен</th><th>Hex</th><th>Назначение</th></tr>
+  <tr><td>teal-bright</td><td>#068176</td><td>Основной акцент (кнопки, ссылки, фокус)</td></tr>
+  <tr><td>deep-teal</td><td>#114643</td><td>Заголовки, тёмные поверхности</td></tr>
+  <tr><td>midnight</td><td>#15282f</td><td>Основной текст, тёмные секции</td></tr>
+  <tr><td>moss / olive / forest</td><td>#a2b568 / #697431 / #475d2e</td><td>Природная зелёная гамма</td></tr>
+  <tr><td>paper</td><td>#faf8f2</td><td>Фон страницы (тёплый белый)</td></tr>
+</table>
+<p>Типографика: <strong>Fraunces</strong> (заголовки, серифный «характер»), <strong>Inter</strong> (текст/интерфейс),
+<strong>JetBrains Mono</strong> (идентификаторы, технические значения). Сетка отступов с базой 4 px, модульная
+типографическая шкала ×1,2, аккуратные тени и анимации. Библиотека UI-примитивов: Button, Card, Form,
+StatusPill, ConfidenceBar, Spinner, EmptyState, Toast, Modal, Dropzone, Pagination и др.</p>
+
+<blockquote class="small"><strong>Замечание о шрифтах на снимках.</strong> На живом стенде заголовок CSP
+(<code>style-src 'self'</code>) блокирует загрузку шрифтов Google Fonts, поэтому на экранных снимках вместо
+Fraunces/Inter отображаются системные шрифты-заместители (серифный/без засечек). На внешний вид это влияет
+незначительно, но это — фактическое состояние развёртывания (см. раздел 10).</blockquote>
+
+<!-- ───────────────────────── 8. БЕЗОПАСНОСТЬ ───────────────────────── -->
+<h2 class="pb">8. Безопасность</h2>
+
+<table style="width:100%;border-collapse:collapse;margin:12pt 0;"><tr><td style="background:#e8efdd;border:1px solid #3f7a3a;padding:8pt 12pt;">
+<p><strong>Что реализовано и проверено.</strong></p>
+<ul>
+  <li><strong>Аутентификация:</strong> Argon2id для паролей; JWT RS256; ротация refresh-токенов; чёрный список access-токенов в Redis при выходе.</li>
+  <li><strong>Авторизация (RBAC):</strong> роли doctor/lab/admin в токене; проверка владения ресурсами (кейс/пакет — только владельцу).</li>
+  <li><strong>Периметр:</strong> TLS (Let's Encrypt) + редирект HTTP→HTTPS; CORS, ограниченный origin фронтенда; rate-limit на логин (nginx) и на пакеты лабораторий (Redis); заголовки CSP/HSTS; firewall ufw (открыты только 22/80/443); вся инфраструктура — только loopback.</li>
+  <li><strong>SQL-инъекции:</strong> все запросы используют параметризованные привязки <code>sqlx</code>.</li>
+  <li><strong>XSS:</strong> нет <code>dangerouslySetInnerHTML</code>; React экранирует вывод; строгая CSP как компенсация хранения JWT в localStorage.</li>
+</ul>
+</td></tr></table>
+
+<table style="width:100%;border-collapse:collapse;margin:12pt 0;"><tr><td style="background:#f4dad3;border:1px solid #8a3a2e;padding:8pt 12pt;">
+<p><strong>Зафлагованные риски (требуют решения до широкого запуска).</strong></p>
+<ul>
+  <li><strong>Открытая регистрация:</strong> любой может зарегистрироваться с любой ролью — нужна модерация/CAPTCHA/инвайты.</li>
+  <li><strong>JWT в localStorage:</strong> осознанный компромисс; митигируется строгой CSP, но уязвим к XSS.</li>
+  <li><strong>MinIO buckets — public-read</strong>; Kafka и Elasticsearch — одноузловые без аутентификации (допустимо только потому, что закрыты loopback на одной машине).</li>
+  <li><strong>Смена пароля PostgreSQL</strong> требует пустого тома данных (особенность инициализации).</li>
+  <li><strong>Нет HA/реплик/бэкапов</strong> — одна машина (см. раздел 9–10).</li>
+</ul>
+</td></tr></table>
+
+<!-- ───────────────────────── 9. РАЗВЁРТЫВАНИЕ ───────────────────────── -->
+<h2 class="pb">9. Развёртывание</h2>
+
+<p>Предусмотрено два контура развёртывания.</p>
+
+<h4>Продакшн: Kubernetes</h4>
+<p>Для промышленной эксплуатации <strong>подготовлены и проверены манифесты Kubernetes</strong> (см. §4.2, Рис. 15):
+сервисы — как Deployments за Ingress с TLS, stateful-компоненты (PostgreSQL, Kafka, Redis, MinIO, Elasticsearch) —
+как StatefulSets/тома в кластере. Это целевой способ развёртывания, обеспечивающий горизонтальное масштабирование
+и самовосстановление подов.</p>
+
+<h4>Демо-стенд: одна машина</h4>
+<p>Текущий публичный демо-стенд <code>rusted-apple.com</code> развёрнут упрощённым идемпотентным скриптом
+<code>deploy.sh</code> (10 шагов): генерация секретов и <code>.env</code> (сильные пароли БД/MinIO, RSA-ключи JWT,
+CORS на домен фронтенда) → подъём инфраструктуры в Docker → миграции → сборка <code>cargo build --release</code> и
+установка 7 systemd-юнитов (<code>Restart=always</code>, автозапуск) → засев демо-доступов → сборка и публикация
+фронтенда → конфигурация системного nginx (frontend/API/storage) → выпуск TLS-сертификатов (certbot) →
+настройка firewall (ufw). Все экранные снимки в отчёте сделаны именно с этого стенда.</p>
+
+<table>
+  <tr><th>Домен</th><th>Назначение</th></tr>
+  <tr><td><code>frontend.rusted-apple.com</code></td><td>SPA (статика из <code>/var/www/phenograph</code>)</td></tr>
+  <tr><td><code>api.rusted-apple.com</code></td><td>API (через шлюз → 7 сервисов)</td></tr>
+  <tr><td><code>storage.*</code> (опц.)</td><td>MinIO для браузерных presigned-загрузок</td></tr>
+</table>
+
+<p><strong>Демо-доступы</strong> (засеяны в реальную БД через <code>/auth/register</code>):</p>
+<table>
+  <tr><th>Роль</th><th>E-mail</th><th>Пароль</th></tr>
+  <tr><td>Врач</td><td><code>doctor@phenograph.test</code></td><td><code>demopass123</code></td></tr>
+  <tr><td>Лаборатория</td><td><code>lab@phenograph.test</code></td><td><code>demopass123</code></td></tr>
+</table>
+
+<!-- ───────────────────────── 10. ОГРАНИЧЕНИЯ ───────────────────────── -->
+<h2 class="pb">10. Текущие ограничения и известные проблемы</h2>
+
+<p>Раздел приведён для полноты и честности картины. <strong>Врачебный сценарий работает на живом стенде полностью</strong>
+(вход → кейс → диагнозы), и именно он — «витрина» продукта. Ниже — ограничения, преимущественно в монетизационном
+(лабораторном) контуре и в части инфраструктуры.</p>
+
+<h4>Функциональные ограничения</h4>
+<ul>
+  <li><strong>Распознавание — заглушка</strong> (раздел 6): текущая «уверенность» и состав диагнозов случайны.</li>
+  <li><strong>Лабораторные диагнозы не сохраняются.</strong> Пакет и его элементы доходят до статуса <code>completed</code>,
+  но Labs-сервис не сохраняет сами диагнозы, а <code>case_id</code> элемента — это сгенерированная заглушка, не существующая
+  в Case-сервисе. Поэтому диагнозы по элементам пакета недоступны для просмотра, а Case-сервис логирует
+  «unknown case» на лабораторном трафике (оба сервиса слушают <code>analysis.results</code>).</li>
+  <li><strong>Профиль — только чтение</strong> (нет эндпоинта обновления).</li>
+  <li><strong>Нет списка пакетов</strong> на бэкенде — фронтенд хранит созданные id в <code>localStorage</code>.</li>
+  <li><strong>Загрузка пакета принимает ключи, а не файлы</strong>, и нет presign-эндпоинта для лабораторий — в продакшне
+  объекты должны быть заранее размещены в хранилище.</li>
+</ul>
+
+<h4>Наблюдения на живом стенде</h4>
+<ul>
+  <li><strong>Страница биллинга падает</strong> (ошибка <code>n.map is not a function</code>), <code>/labs/usage</code> отвечает
+  <code>500</code>, а у демо-лаборатории нет активной подписки. Совокупно это <strong>блокирует демонстрацию лабораторного/
+  монетизационного потока end-to-end</strong> на текущем стенде.</li>
+  <li><strong>CSP блокирует Google Fonts</strong> (<code>style-src 'self'</code>) → сайт показывается системными шрифтами.</li>
+</ul>
+
+<h4>Инфраструктурные ограничения</h4>
+<ul>
+  <li>Одна машина: нет высокой доступности, репликации и резервного копирования.</li>
+  <li>Kafka/Elasticsearch — одноузловые; MinIO — public-read (допустимо только за firewall).</li>
+</ul>
+
+<!-- ───────────────────────── 11. ДОРОЖНАЯ КАРТА ───────────────────────── -->
+<h2 class="pb">11. Дорожная карта</h2>
+<ol>
+  <li><strong>Реальная ML-модель распознавания</strong> + векторная БД и реестр моделей; клиническая валидация и публикации.</li>
+  <li><strong>Завершение лабораторного контура:</strong> сохранение диагнозов пакета, связка <code>case_id</code>, починка биллинг-страницы и <code>/labs/usage</code>, сценарий подписки.</li>
+  <li><strong>Локализация интерфейса на русский язык</strong> — ключевое рыночное преимущество.</li>
+  <li><strong>Интеграция с МИС/ЭМК и экспорт в FHIR.</strong></li>
+  <li><strong>Production-grade инфраструктура:</strong> манифесты Kubernetes уже подготовлены (§4.2/§9) — остаётся перевести на них живой стенд, добавить горизонтальное масштабирование, наблюдаемость (Prometheus/Grafana/Jaeger/ELK) и бэкапы.</li>
+  <li><strong>Контроль доступа:</strong> закрытие открытой регистрации (инвайты/модерация), полноценная admin-роль.</li>
+  <li><strong>Перенос JWT в httpOnly-cookie</strong> (снижение XSS-риска), усиление аутентификации инфраструктуры (Kafka/ES, приватные buckets).</li>
+</ol>
+
+<!-- ───────────────────────── 12. ПРИЛОЖЕНИЯ ───────────────────────── -->
+<h2 class="pb">12. Приложения</h2>
+
+<h3>Приложение A. Полная карта API (24 операции)</h3>
+<table>
+  <tr><th>Метод и путь</th><th>Сервис</th><th>Описание</th><th>Аутент.</th></tr>
+  <tr><td><code>POST /auth/register</code></td><td>auth</td><td>Регистрация пользователя</td><td>—</td></tr>
+  <tr><td><code>POST /auth/login</code></td><td>auth</td><td>Вход, выдача пары токенов</td><td>—</td></tr>
+  <tr><td><code>POST /auth/refresh</code></td><td>auth</td><td>Обновление токенов (ротация)</td><td>refresh</td></tr>
+  <tr><td><code>GET /auth/me</code></td><td>auth</td><td>Профиль текущего пользователя</td><td>JWT</td></tr>
+  <tr><td><code>DELETE /auth/logout</code></td><td>auth</td><td>Выход, отзыв токенов</td><td>JWT</td></tr>
+  <tr><td><code>POST /cases</code></td><td>case</td><td>Создать кейс + presigned-URL</td><td>JWT</td></tr>
+  <tr><td><code>GET /cases</code></td><td>case</td><td>Список кейсов (пагинация)</td><td>JWT</td></tr>
+  <tr><td><code>GET /cases/{id}</code></td><td>case</td><td>Кейс с диагнозами</td><td>JWT</td></tr>
+  <tr><td><code>PATCH /cases/{id}</code></td><td>case</td><td>Правка метаданных (только pending)</td><td>JWT</td></tr>
+  <tr><td><code>POST /cases/{id}/confirm-upload</code></td><td>case</td><td>Подтвердить загрузку, запустить анализ</td><td>JWT</td></tr>
+  <tr><td><code>POST /labs/batch</code></td><td>labs</td><td>Создать пакет анализа</td><td>JWT (lab)</td></tr>
+  <tr><td><code>GET /labs/results/{batch_id}</code></td><td>labs</td><td>Пакет и его элементы</td><td>JWT (lab)</td></tr>
+  <tr><td><code>GET /labs/usage</code></td><td>labs</td><td>Потребление за месяц</td><td>JWT (lab)</td></tr>
+  <tr><td><code>GET /labs/tiers</code></td><td>labs</td><td>Доступные тарифы</td><td>JWT</td></tr>
+  <tr><td><code>POST /recognize</code></td><td>recognition</td><td>Прямой инференс (заглушка, для тестов)</td><td>—</td></tr>
+  <tr><td><code>GET /notifications</code></td><td>notifier</td><td>Список уведомлений</td><td>JWT</td></tr>
+  <tr><td><code>PATCH /notifications/{id}/read</code></td><td>notifier</td><td>Отметить прочитанным</td><td>JWT</td></tr>
+  <tr><td><code>GET /reference/syndromes</code></td><td>reference</td><td>Список/поиск синдромов</td><td>JWT</td></tr>
+  <tr><td><code>GET /reference/syndromes/{id}</code></td><td>reference</td><td>Синдром + HPO-термины</td><td>JWT</td></tr>
+  <tr><td><code>GET /reference/hpo/search</code></td><td>reference</td><td>Поиск по HPO</td><td>JWT</td></tr>
+  <tr><td><code>GET /billing/plans</code></td><td>billing</td><td>Список тарифов</td><td>—</td></tr>
+  <tr><td><code>POST /billing/subscribe</code></td><td>billing</td><td>Оформить подписку</td><td>—*</td></tr>
+  <tr><td><code>GET /billing/usage/{lab_id}</code></td><td>billing</td><td>Потребление лаборатории</td><td>—*</td></tr>
+  <tr><td><code>POST /billing/check-quota</code></td><td>billing</td><td>Внутренняя проверка квоты</td><td>—*</td></tr>
+</table>
+<p class="small muted">* Биллинг-эндпоинты в текущем MVP не защищены отдельно (вызываются изнутри/проксируются); требует доработки.</p>
+
+<h3>Приложение B. Каталог синдромов распознавания (50)</h3>
+<p class="small">Down, Turner, Noonan, Williams, Angelman, Prader-Willi, Cornelia de Lange, Kabuki, Rubinstein-Taybi,
+Treacher Collins, Marfan, Ehlers-Danlos, Fragile X, Rett, Apert, Crouzon, DiGeorge, Wolf-Hirschhorn, Cri du Chat,
+Patau, Edwards, Klinefelter, Sotos, Beckwith-Wiedemann, Russell-Silver, Stickler, Waardenburg, Coffin-Siris,
+Floating-Harbor, KBG, Mowat-Wilson, Phelan-McDermid, Costello, Cardiofaciocutaneous, CHARGE, Jacobsen,
+Smith-Magenis, Potocki-Lupski, Kleefstra, Koolen-de Vries, Schinzel-Giedion, Marshall-Smith, Weaver,
+Pallister-Killian, Bohring-Opitz, Wiedemann-Steiner, Nicolaides-Baraitser, Genitopatellar, DOORS,
+Bainbridge-Ropers.</p>
+
+<h3>Приложение C. Доступы и ссылки</h3>
+<ul class="small">
+  <li>Фронтенд: <code>https://frontend.rusted-apple.com</code></li>
+  <li>API: <code>https://api.rusted-apple.com</code> (liveness: <code>/healthz</code>)</li>
+  <li>Демо-врач: <code>doctor@phenograph.test</code> / <code>demopass123</code></li>
+  <li>Демо-лаборатория: <code>lab@phenograph.test</code> / <code>demopass123</code></li>
+</ul>
+
+<h3>Приложение D. Структура репозитория (ключевое)</h3>
+<ul class="small">
+  <li><code>crates/oblivion-common/</code> — общие контракты (конверт, ошибки, типы, Kafka).</li>
+  <li><code>services/{auth,case,labs,recognition,notifier,reference,billing}/</code> — 7 микросервисов.</li>
+  <li><code>migrations/</code> — SQL-миграции по схемам.</li>
+  <li><code>gateway/nginx.conf</code> — конфигурация API-шлюза.</li>
+  <li><code>frontend/app/</code> — продакшн-SPA (React/Vite/TS).</li>
+  <li><code>docs/openapi.yaml</code> — спецификация API; <code>docs/DEPLOY.md</code> — инструкция развёртывания.</li>
+  <li><code>design/</code> — проектные материалы: целевая архитектура и рыночный анализ.</li>
+</ul>
+
+<hr>
+<p class="small muted" style="text-align:center">Phenograph / Oblivion — отчёт о продукте (MVP). Подготовлено на основе исходного кода репозитория,
+проектных материалов <code>design/</code> и наблюдений на живом стенде. Не является медицинским изделием —
+инструмент поддержки клинических решений.</p>
+
+</body>
+</html>
