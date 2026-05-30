@@ -29,10 +29,7 @@ mod state;
 use std::net::SocketAddr;
 
 use tokio::net::TcpListener;
-use tower_http::{
-    cors::{Any, CorsLayer},
-    trace::TraceLayer,
-};
+use tower_http::trace::TraceLayer;
 use tracing::info;
 use tracing_subscriber::{fmt, prelude::*, EnvFilter};
 
@@ -85,10 +82,7 @@ async fn main() {
         config: config.clone(),
     };
 
-    let cors = CorsLayer::new()
-        .allow_origin(Any)
-        .allow_methods(Any)
-        .allow_headers(Any);
+    let cors = oblivion_common::cors_layer_from_env();
 
     let app = routes::router(state)
         .layer(TraceLayer::new_for_http())

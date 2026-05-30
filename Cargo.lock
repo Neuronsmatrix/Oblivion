@@ -2182,6 +2182,7 @@ dependencies = [
  "serde_json",
  "sqlx",
  "thiserror",
+ "tower-http",
  "uuid",
 ]
 

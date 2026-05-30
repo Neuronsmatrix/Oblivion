@@ -1,6 +1,6 @@
 CREATE SCHEMA IF NOT EXISTS labs;
 
-CREATE TABLE labs.batches (
+CREATE TABLE IF NOT EXISTS labs.batches (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     lab_id UUID NOT NULL,
     status VARCHAR(20) NOT NULL DEFAULT 'pending'
@@ -11,7 +11,7 @@ CREATE TABLE labs.batches (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE TABLE labs.batch_items (
+CREATE TABLE IF NOT EXISTS labs.batch_items (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     batch_id UUID NOT NULL REFERENCES labs.batches(id) ON DELETE CASCADE,
     image_key VARCHAR(512) NOT NULL,
@@ -20,5 +20,5 @@ CREATE TABLE labs.batch_items (
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE INDEX idx_batches_lab_id ON labs.batches(lab_id);
-CREATE INDEX idx_batch_items_batch_id ON labs.batch_items(batch_id);
+CREATE INDEX IF NOT EXISTS idx_batches_lab_id ON labs.batches(lab_id);
+CREATE INDEX IF NOT EXISTS idx_batch_items_batch_id ON labs.batch_items(batch_id);

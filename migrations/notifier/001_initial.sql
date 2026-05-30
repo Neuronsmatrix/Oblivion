@@ -1,6 +1,6 @@
 CREATE SCHEMA IF NOT EXISTS notifier;
 
-CREATE TABLE notifier.notifications (
+CREATE TABLE IF NOT EXISTS notifier.notifications (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL,
     type VARCHAR(50) NOT NULL,
@@ -11,4 +11,4 @@ CREATE TABLE notifier.notifications (
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE INDEX idx_notifications_user_id ON notifier.notifications(user_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_notifications_user_id ON notifier.notifications(user_id, created_at DESC);

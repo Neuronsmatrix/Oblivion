@@ -1,6 +1,6 @@
 CREATE SCHEMA IF NOT EXISTS billing;
 
-CREATE TABLE billing.plans (
+CREATE TABLE IF NOT EXISTS billing.plans (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name VARCHAR(50) NOT NULL UNIQUE,
     monthly_limit INT NOT NULL,
@@ -8,7 +8,7 @@ CREATE TABLE billing.plans (
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE TABLE billing.subscriptions (
+CREATE TABLE IF NOT EXISTS billing.subscriptions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     lab_id UUID NOT NULL,
     plan_id UUID NOT NULL REFERENCES billing.plans(id),
@@ -17,7 +17,7 @@ CREATE TABLE billing.subscriptions (
     started_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE TABLE billing.usage_records (
+CREATE TABLE IF NOT EXISTS billing.usage_records (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     lab_id UUID NOT NULL,
     month DATE NOT NULL,
@@ -32,7 +32,8 @@ INSERT INTO billing.plans (name, monthly_limit, overage_price_cents) VALUES
     ('silver', 80, 5000),
     ('gold', 145, 5000),
     ('platinum', 300, 5000),
-    ('bundle', 300, 4000);
+    ('bundle', 300, 4000)
+ON CONFLICT (name) DO NOTHING;
 
-CREATE INDEX idx_subscriptions_lab_id ON billing.subscriptions(lab_id);
-CREATE INDEX idx_usage_records_lab_month ON billing.usage_records(lab_id, month);
+CREATE INDEX IF NOT EXISTS idx_subscriptions_lab_id ON billing.subscriptions(lab_id);
+CREATE INDEX IF NOT EXISTS idx_usage_records_lab_month ON billing.usage_records(lab_id, month);

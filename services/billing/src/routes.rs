@@ -4,10 +4,7 @@ use axum::{
     Router,
     routing::{get, post},
 };
-use tower_http::{
-    cors::{Any, CorsLayer},
-    trace::TraceLayer,
-};
+use tower_http::trace::TraceLayer;
 
 use crate::{
     handlers::{
@@ -21,12 +18,9 @@ use crate::{
 ///
 /// Layers applied (outermost first):
 /// - [`TraceLayer`] — structured per-request tracing.
-/// - [`CorsLayer`] — permissive CORS for development.
+/// - CORS — origins restricted via `CORS_ALLOWED_ORIGIN` (permissive if unset).
 pub fn router(state: AppState) -> Router {
-    let cors = CorsLayer::new()
-        .allow_origin(Any)
-        .allow_methods(Any)
-        .allow_headers(Any);
+    let cors = oblivion_common::cors_layer_from_env();
 
     Router::new()
         .route("/billing/plans", get(list_plans))

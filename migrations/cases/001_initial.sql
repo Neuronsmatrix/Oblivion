@@ -1,6 +1,6 @@
 CREATE SCHEMA IF NOT EXISTS cases;
 
-CREATE TABLE cases.cases (
+CREATE TABLE IF NOT EXISTS cases.cases (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL,
     patient_name VARCHAR(255),
@@ -13,7 +13,7 @@ CREATE TABLE cases.cases (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE TABLE cases.diagnoses (
+CREATE TABLE IF NOT EXISTS cases.diagnoses (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     case_id UUID NOT NULL REFERENCES cases.cases(id) ON DELETE CASCADE,
     syndrome_id UUID,
@@ -23,6 +23,6 @@ CREATE TABLE cases.diagnoses (
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE INDEX idx_cases_user_id ON cases.cases(user_id);
-CREATE INDEX idx_cases_status ON cases.cases(status);
-CREATE INDEX idx_diagnoses_case_id ON cases.diagnoses(case_id);
+CREATE INDEX IF NOT EXISTS idx_cases_user_id ON cases.cases(user_id);
+CREATE INDEX IF NOT EXISTS idx_cases_status ON cases.cases(status);
+CREATE INDEX IF NOT EXISTS idx_diagnoses_case_id ON cases.diagnoses(case_id);

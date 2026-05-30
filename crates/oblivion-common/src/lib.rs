@@ -22,10 +22,11 @@
 use axum::{
     Json,
     response::{IntoResponse, Response},
-    http::StatusCode,
+    http::{HeaderValue, StatusCode},
 };
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use tower_http::cors::{Any, CorsLayer};
 use uuid::Uuid;
 
 // ───────────────────────────────────────────────────────────────────────────
@@ -174,6 +175,47 @@ impl<T: Serialize> IntoResponse for ApiResponse<T> {
             StatusCode::INTERNAL_SERVER_ERROR
         };
         (status, Json(self)).into_response()
+    }
+}
+
+// ───────────────────────────────────────────────────────────────────────────
+// CORS
+// ───────────────────────────────────────────────────────────────────────────
+
+/// Build the [`CorsLayer`] every service applies, driven by the
+/// `CORS_ALLOWED_ORIGIN` environment variable.
+///
+/// - **Unset, empty, or `*`** → permissive `allow_origin(Any)` (the development
+///   default; preserves the previous behaviour so local runs are unaffected).
+/// - **One or more origins** (comma-separated) → only those exact origins are
+///   allowed, e.g. `CORS_ALLOWED_ORIGIN=https://frontend.example.com`.
+///
+/// Methods and headers stay permissive; credentials are never enabled because
+/// auth uses a bearer token in the `Authorization` header, not cookies.
+///
+/// # Example
+///
+/// ```rust
+/// // With no env var set, the layer is permissive and constructs cleanly.
+/// let _layer = oblivion_common::cors_layer_from_env();
+/// ```
+#[must_use]
+pub fn cors_layer_from_env() -> CorsLayer {
+    let base = CorsLayer::new().allow_methods(Any).allow_headers(Any);
+
+    match std::env::var("CORS_ALLOWED_ORIGIN") {
+        Ok(raw) if !raw.trim().is_empty() && raw.trim() != "*" => {
+            let origins: Vec<HeaderValue> = raw
+                .split(',')
+                .filter_map(|o| o.trim().parse::<HeaderValue>().ok())
+                .collect();
+            if origins.is_empty() {
+                base.allow_origin(Any)
+            } else {
+                base.allow_origin(origins)
+            }
+        }
+        _ => base.allow_origin(Any),
     }
 }
 
