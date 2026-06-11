@@ -1,0 +1,35 @@
+{
+  "syndromes": {
+    "title": "Syndromes",
+    "searchPlaceholder": "Search by name or description…",
+    "searchAria": "Search syndromes",
+    "searching": "Searching…",
+    "loadError": "Could not load syndromes.",
+    "emptyTitle": "No syndromes found",
+    "emptyHint": "Try a different search term.",
+    "omim": "OMIM {{id}}"
+  },
+  "syndromeDetail": {
+    "loadError": "This syndrome could not be loaded.",
+    "allSyndromes": "All syndromes",
+    "metaOmim": "OMIM",
+    "metaInheritance": "Inheritance",
+    "metaPrevalence": "Prevalence",
+    "overview": "Overview",
+    "associatedPhenotype": "Associated phenotype (HPO)",
+    "termsCount_one": "{{count}} term",
+    "termsCount_other": "{{count}} terms",
+    "noHpoTerms": "No linked HPO terms."
+  },
+  "atlas": {
+    "title": "Feature atlas",
+    "intro": "Search the Human Phenotype Ontology for morphological features and their definitions.",
+    "searchPlaceholder": "e.g. hypertelorism, HP:0000316…",
+    "searchAria": "Search HPO terms",
+    "startTyping": "Start typing to search",
+    "startTypingHint": "Enter at least two characters.",
+    "searching": "Searching…",
+    "noTerms": "No terms found",
+    "noTermsHint": "Try a different feature name."
+  }
+}

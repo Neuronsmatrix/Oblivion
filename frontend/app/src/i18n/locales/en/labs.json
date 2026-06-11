@@ -1,0 +1,63 @@
+{
+  "batches": {
+    "title": "Batches",
+    "emptyTitle": "No batches yet",
+    "emptyMessage": "Submitted batches are tracked here on this device.",
+    "summary_one": "{{count}} image · {{date}}",
+    "summary_other": "{{count}} images · {{date}}"
+  },
+  "newBatch": {
+    "title": "New batch",
+    "imagesTitle": "Images",
+    "imagesDesc": "Add the frontal images to analyze. The batch service references images by their object-storage key; in production these are staged in your bucket beforehand.",
+    "dropzoneHint": "Select multiple JPEG or PNG files.",
+    "removeAria": "Remove",
+    "stagedCount_one": "{{count}} image staged",
+    "stagedCount_other": "{{count}} images staged",
+    "submit": "Submit batch",
+    "toastNoImages": "Add at least one image.",
+    "toastSubmitted_one": "Batch submitted: {{count}} image queued.",
+    "toastSubmitted_other": "Batch submitted: {{count}} images queued.",
+    "toastError": "Could not submit the batch."
+  },
+  "batchDetail": {
+    "loading": "Loading batch…",
+    "loadError": "This batch could not be loaded.",
+    "allBatches": "All batches",
+    "batchNo": "Batch {{id}}",
+    "processed": "{{processed}} / {{total}} processed",
+    "createdOn": "Created {{date}}",
+    "colNum": "#",
+    "colImageKey": "Image key",
+    "colTopCandidate": "Top candidate",
+    "colStatus": "Status",
+    "candidatesPosterior": "Candidate syndromes · posterior"
+  },
+  "usage": {
+    "title": "Usage",
+    "loading": "Loading usage…",
+    "loadError": "Could not load usage.",
+    "noSubTitle": "No active subscription",
+    "noSubMessage": "Choose a plan to start submitting batches and tracking monthly usage.",
+    "viewPlans": "View plans",
+    "currentPlan": "Current plan",
+    "used": "{{count}} used",
+    "remainingOf": "{{remaining}} of {{limit}} remaining",
+    "monthlyLimit": "Monthly limit",
+    "usedThisMonth": "Used this month",
+    "remaining": "Remaining",
+    "changePlan": "Change plan"
+  },
+  "billing": {
+    "title": "Plans & billing",
+    "loading": "Loading plans…",
+    "loadError": "Could not load plans.",
+    "current": "Current",
+    "analysesPerMonth": "analyses / month",
+    "overage": "Overage ${{price}} per analysis",
+    "active": "Active",
+    "choosePlan": "Choose plan",
+    "toastSubscribed": "Subscribed to the {{plan}} plan.",
+    "toastError": "Could not change the plan."
+  }
+}

@@ -6,7 +6,15 @@
     "signOut": "Выйти",
     "requestAccess": "Запросить доступ",
     "createAccount": "Создать аккаунт",
-    "markAsRead": "Отметить как прочитанное"
+    "markAsRead": "Отметить как прочитанное",
+    "cancel": "Отмена",
+    "save": "Сохранить"
+  },
+  "eyebrow": {
+    "workspace": "Рабочее пространство",
+    "account": "Аккаунт",
+    "laboratory": "Лаборатория",
+    "reference": "Справочник"
   },
   "appbar": {
     "newCase": "Новый случай",

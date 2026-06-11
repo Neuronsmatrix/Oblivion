@@ -6,7 +6,15 @@
     "signOut": "Sign out",
     "requestAccess": "Request access",
     "createAccount": "Create account",
-    "markAsRead": "Mark as read"
+    "markAsRead": "Mark as read",
+    "cancel": "Cancel",
+    "save": "Save"
+  },
+  "eyebrow": {
+    "workspace": "Workspace",
+    "account": "Account",
+    "laboratory": "Laboratory",
+    "reference": "Reference"
   },
   "appbar": {
     "newCase": "New case",

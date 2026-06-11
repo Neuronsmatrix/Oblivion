@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { ChevronRight, Plus } from 'lucide-react';
 import { useAuth } from '../../auth/AuthContext';
 import { Page, PageHeader, formatDate } from '../../components/layout/Page';
@@ -6,6 +7,9 @@ import { Button, Card, EmptyState } from '../../components/ui';
 import { batchStore } from './queries';
 
 export function BatchesPage() {
+  const { t } = useTranslation('labs');
+  const { t: tc } = useTranslation('common');
+  const { t: tn } = useTranslation('nav');
   const { user } = useAuth();
   const navigate = useNavigate();
   const batches = user ? batchStore.list(user.id) : [];
@@ -13,17 +17,17 @@ export function BatchesPage() {
   return (
     <Page>
       <PageHeader
-        eyebrow="Laboratory"
-        title="Batches"
-        actions={<Button size="sm" onClick={() => navigate('/app/batches/new')}><Plus size={14} /> New batch</Button>}
+        eyebrow={tc('eyebrow.laboratory')}
+        title={t('batches.title')}
+        actions={<Button size="sm" onClick={() => navigate('/app/batches/new')}><Plus size={14} /> {tn('newBatch')}</Button>}
       />
 
       <Card padding={0}>
         {batches.length === 0 ? (
           <EmptyState
-            title="No batches yet"
-            message="Submitted batches are tracked here on this device."
-            action={<Button size="sm" onClick={() => navigate('/app/batches/new')}>New batch</Button>}
+            title={t('batches.emptyTitle')}
+            message={t('batches.emptyMessage')}
+            action={<Button size="sm" onClick={() => navigate('/app/batches/new')}>{tn('newBatch')}</Button>}
           />
         ) : (
           batches.map((b, i) => (
@@ -36,7 +40,7 @@ export function BatchesPage() {
             >
               <div style={{ flex: 1 }}>
                 <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--fs-13)', color: 'var(--ink)' }}>{b.id.slice(0, 8)}</div>
-                <div style={{ fontSize: 'var(--fs-12)', color: 'var(--ink-3)' }}>{b.total} image{b.total === 1 ? '' : 's'} · {formatDate(b.created_at)}</div>
+                <div style={{ fontSize: 'var(--fs-12)', color: 'var(--ink-3)' }}>{t('batches.summary', { count: b.total, date: formatDate(b.created_at) })}</div>
               </div>
               <ChevronRight size={16} color="var(--ink-3)" />
             </div>

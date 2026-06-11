@@ -1,38 +1,41 @@
 import { useNavigate, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { ChevronLeft } from 'lucide-react';
 import { Page } from '../../components/layout/Page';
 import { Button, Card, ErrorState, SectionCard, Spinner } from '../../components/ui';
 import { useSyndrome } from './queries';
 
 export function SyndromeDetailPage() {
+  const { t: tr } = useTranslation('reference');
+  const { t: tc } = useTranslation('common');
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { data: s, isLoading, isError, refetch } = useSyndrome(id);
 
-  if (isLoading) return <Page><div style={{ padding: 40, display: 'flex', justifyContent: 'center' }}><Spinner label="Loading…" /></div></Page>;
-  if (isError || !s) return <Page><ErrorState message="This syndrome could not be loaded." action={<Button size="sm" variant="secondary" onClick={() => refetch()}>Retry</Button>} /></Page>;
+  if (isLoading) return <Page><div style={{ padding: 40, display: 'flex', justifyContent: 'center' }}><Spinner label={tc('state.loading')} /></div></Page>;
+  if (isError || !s) return <Page><ErrorState message={tr('syndromeDetail.loadError')} action={<Button size="sm" variant="secondary" onClick={() => refetch()}>{tc('actions.retry')}</Button>} /></Page>;
 
   const meta = [
-    ['OMIM', s.omim_id],
-    ['Inheritance', s.inheritance],
-    ['Prevalence', s.prevalence],
-  ].filter(([, v]) => v) as [string, string][];
+    { key: 'omim', label: tr('syndromeDetail.metaOmim'), value: s.omim_id, mono: true },
+    { key: 'inheritance', label: tr('syndromeDetail.metaInheritance'), value: s.inheritance, mono: false },
+    { key: 'prevalence', label: tr('syndromeDetail.metaPrevalence'), value: s.prevalence, mono: false },
+  ].filter((m) => m.value);
 
   return (
     <Page max={900}>
       <button onClick={() => navigate('/app/syndromes')} style={{ background: 'transparent', border: 'none', color: 'var(--ink-2)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, fontSize: 'var(--fs-13)', padding: '4px 0', marginBottom: 16 }}>
-        <ChevronLeft size={14} /> All syndromes
+        <ChevronLeft size={14} /> {tr('syndromeDetail.allSyndromes')}
       </button>
 
-      <div className="eyebrow" style={{ marginBottom: 8 }}>Reference</div>
+      <div className="eyebrow" style={{ marginBottom: 8 }}>{tc('eyebrow.reference')}</div>
       <h1 style={{ fontSize: 'var(--fs-36)', marginBottom: 16 }}>{s.name}</h1>
 
       {meta.length > 0 && (
         <div style={{ display: 'flex', gap: 28, flexWrap: 'wrap', marginBottom: 24 }}>
-          {meta.map(([k, v]) => (
-            <div key={k}>
-              <div className="eyebrow" style={{ marginBottom: 4 }}>{k}</div>
-              <div style={{ fontSize: 'var(--fs-14)', color: 'var(--ink)', fontFamily: k === 'OMIM' ? 'var(--font-mono)' : undefined }}>{v}</div>
+          {meta.map((m) => (
+            <div key={m.key}>
+              <div className="eyebrow" style={{ marginBottom: 4 }}>{m.label}</div>
+              <div style={{ fontSize: 'var(--fs-14)', color: 'var(--ink)', fontFamily: m.mono ? 'var(--font-mono)' : undefined }}>{m.value}</div>
             </div>
           ))}
         </div>
@@ -41,14 +44,14 @@ export function SyndromeDetailPage() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
         {s.description && (
           <Card>
-            <h3 style={{ fontSize: 'var(--fs-18)', fontWeight: 600, fontFamily: 'var(--font-body)', margin: '0 0 10px' }}>Overview</h3>
+            <h3 style={{ fontSize: 'var(--fs-18)', fontWeight: 600, fontFamily: 'var(--font-body)', margin: '0 0 10px' }}>{tr('syndromeDetail.overview')}</h3>
             <p style={{ fontSize: 'var(--fs-15, 0.95rem)', color: 'var(--ink-2)', lineHeight: 1.6, margin: 0 }}>{s.description}</p>
           </Card>
         )}
 
-        <SectionCard title="Associated phenotype (HPO)" aside={<span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--fs-12)', color: 'var(--ink-3)' }}>{s.hpo_terms.length} terms</span>}>
+        <SectionCard title={tr('syndromeDetail.associatedPhenotype')} aside={<span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--fs-12)', color: 'var(--ink-3)' }}>{tr('syndromeDetail.termsCount', { count: s.hpo_terms.length })}</span>}>
           {s.hpo_terms.length === 0 ? (
-            <div style={{ fontSize: 'var(--fs-14)', color: 'var(--ink-3)' }}>No linked HPO terms.</div>
+            <div style={{ fontSize: 'var(--fs-14)', color: 'var(--ink-3)' }}>{tr('syndromeDetail.noHpoTerms')}</div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {s.hpo_terms.map((t) => (

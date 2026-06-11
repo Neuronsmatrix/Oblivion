@@ -1,0 +1,36 @@
+{
+  "syndromes": {
+    "title": "Синдромы",
+    "searchPlaceholder": "Поиск по названию или описанию…",
+    "searchAria": "Поиск синдромов",
+    "searching": "Поиск…",
+    "loadError": "Не удалось загрузить синдромы.",
+    "emptyTitle": "Синдромы не найдены",
+    "emptyHint": "Попробуйте другой поисковый запрос.",
+    "omim": "OMIM {{id}}"
+  },
+  "syndromeDetail": {
+    "loadError": "Не удалось загрузить этот синдром.",
+    "allSyndromes": "Все синдромы",
+    "metaOmim": "OMIM",
+    "metaInheritance": "Наследование",
+    "metaPrevalence": "Распространённость",
+    "overview": "Обзор",
+    "associatedPhenotype": "Ассоциированный фенотип (HPO)",
+    "termsCount_one": "{{count}} термин",
+    "termsCount_few": "{{count}} термина",
+    "termsCount_many": "{{count}} терминов",
+    "noHpoTerms": "Нет связанных терминов HPO."
+  },
+  "atlas": {
+    "title": "Атлас признаков",
+    "intro": "Ищите морфологические признаки и их определения в Human Phenotype Ontology.",
+    "searchPlaceholder": "напр. гипертелоризм, HP:0000316…",
+    "searchAria": "Поиск терминов HPO",
+    "startTyping": "Начните вводить для поиска",
+    "startTypingHint": "Введите не менее двух символов.",
+    "searching": "Поиск…",
+    "noTerms": "Термины не найдены",
+    "noTermsHint": "Попробуйте другое название признака."
+  }
+}

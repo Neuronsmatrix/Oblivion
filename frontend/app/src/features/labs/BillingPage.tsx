@@ -1,10 +1,13 @@
 import { Check } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../auth/AuthContext';
 import { Page, PageHeader } from '../../components/layout/Page';
 import { Button, Card, ErrorState, Spinner, useToast } from '../../components/ui';
 import { useSubscribe, useTiers, useUsage } from './queries';
 
 export function BillingPage() {
+  const { t } = useTranslation('labs');
+  const { t: tc } = useTranslation('common');
   const { user } = useAuth();
   const toast = useToast();
   const { data: tiers, isLoading, isError, refetch } = useTiers();
@@ -18,20 +21,20 @@ export function BillingPage() {
     try {
       // The API takes lab_id explicitly; for a lab account that is the user's id.
       await subscribe.mutateAsync({ labId: user.id, planId });
-      toast.success(`Subscribed to the ${planName} plan.`);
+      toast.success(t('billing.toastSubscribed', { plan: planName }));
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Could not change the plan.');
+      toast.error(err instanceof Error ? err.message : t('billing.toastError'));
     }
   };
 
   return (
     <Page max={1000}>
-      <PageHeader eyebrow="Laboratory" title="Plans & billing" />
+      <PageHeader eyebrow={tc('eyebrow.laboratory')} title={t('billing.title')} />
 
       {isLoading ? (
-        <div style={{ padding: 40, display: 'flex', justifyContent: 'center' }}><Spinner label="Loading plans…" /></div>
+        <div style={{ padding: 40, display: 'flex', justifyContent: 'center' }}><Spinner label={t('billing.loading')} /></div>
       ) : isError || !tiers ? (
-        <ErrorState message="Could not load plans." action={<Button size="sm" variant="secondary" onClick={() => refetch()}>Retry</Button>} />
+        <ErrorState message={t('billing.loadError')} action={<Button size="sm" variant="secondary" onClick={() => refetch()}>{tc('actions.retry')}</Button>} />
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 20 }}>
           {tiers.map((plan) => {
@@ -40,12 +43,12 @@ export function BillingPage() {
               <Card key={plan.id} style={active ? { borderColor: 'var(--teal-bright)', boxShadow: 'var(--shadow-1)' } : undefined}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
                   <div style={{ fontSize: 'var(--fs-20)', fontFamily: 'var(--font-display)', textTransform: 'capitalize' }}>{plan.name}</div>
-                  {active && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 'var(--fs-12)', color: 'var(--teal-bright)', fontWeight: 500 }}><Check size={14} /> Current</span>}
+                  {active && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 'var(--fs-12)', color: 'var(--teal-bright)', fontWeight: 500 }}><Check size={14} /> {t('billing.current')}</span>}
                 </div>
                 <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--fs-36)', fontWeight: 500 }}>{plan.monthly_limit}</div>
-                <div style={{ fontSize: 'var(--fs-13)', color: 'var(--ink-3)', marginBottom: 16 }}>analyses / month</div>
+                <div style={{ fontSize: 'var(--fs-13)', color: 'var(--ink-3)', marginBottom: 16 }}>{t('billing.analysesPerMonth')}</div>
                 <div style={{ fontSize: 'var(--fs-13)', color: 'var(--ink-2)', marginBottom: 20 }}>
-                  Overage ${(plan.overage_price_cents / 100).toFixed(2)} per analysis
+                  {t('billing.overage', { price: (plan.overage_price_cents / 100).toFixed(2) })}
                 </div>
                 <Button
                   block
@@ -54,7 +57,7 @@ export function BillingPage() {
                   loading={subscribe.isPending && subscribe.variables?.planId === plan.id}
                   onClick={() => onSubscribe(plan.id, plan.name)}
                 >
-                  {active ? 'Active' : 'Choose plan'}
+                  {active ? t('billing.active') : t('billing.choosePlan')}
                 </Button>
               </Card>
             );
