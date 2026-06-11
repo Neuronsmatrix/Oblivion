@@ -4,6 +4,8 @@ import { BrowserRouter } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
 import './styles/tokens.css';
 import './styles/global.css';
+import './i18n';
+import { HtmlLangSync } from './i18n/HtmlLangSync';
 import { App } from './App';
 import { AuthProvider } from './auth/AuthContext';
 import { ToastProvider } from './components/ui';
@@ -20,6 +22,7 @@ enableMocks().then(() => {
     <StrictMode>
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
+          <HtmlLangSync />
           <AuthProvider>
             <ToastProvider>
               <App />

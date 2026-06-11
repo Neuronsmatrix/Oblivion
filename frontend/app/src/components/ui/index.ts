@@ -6,3 +6,4 @@ export { ToastProvider, useToast } from './Toast';
 export { Modal } from './Modal';
 export { Dropzone } from './Dropzone';
 export { Pagination } from './Pagination';
+export { LanguageSwitcher } from './LanguageSwitcher';

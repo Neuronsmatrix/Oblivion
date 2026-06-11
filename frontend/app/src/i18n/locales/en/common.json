@@ -1,0 +1,48 @@
+{
+  "actions": {
+    "retry": "Retry",
+    "backToHome": "Back to home",
+    "signIn": "Sign in",
+    "signOut": "Sign out",
+    "requestAccess": "Request access",
+    "createAccount": "Create account",
+    "markAsRead": "Mark as read"
+  },
+  "appbar": {
+    "newCase": "New case",
+    "openNav": "Open navigation"
+  },
+  "state": {
+    "loading": "Loading…",
+    "somethingWentWrong": "Something went wrong",
+    "empty": "Nothing here yet"
+  },
+  "status": {
+    "pending": "Pending",
+    "processing": "Processing",
+    "completed": "Completed",
+    "failed": "Failed"
+  },
+  "pagination": {
+    "page": "Page {{page}}",
+    "prev": "Prev",
+    "next": "Next"
+  },
+  "dropzone": {
+    "promptOne": "Drop an image here, or click to browse",
+    "promptMany": "Drop images here, or click to browse"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "message": "The page you were looking for doesn't exist or has moved."
+  },
+  "lang": {
+    "label": "Language",
+    "ru": "Русский",
+    "en": "English"
+  },
+  "value": {
+    "none": "—",
+    "ageYears": "{{age}}y"
+  }
+}
