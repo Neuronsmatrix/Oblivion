@@ -1,5 +1,6 @@
 import { useMemo, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { DnaRibbon } from './DnaRibbon';
 import { FaceMesh } from './FaceMesh';
 import { ease, useActiveAct, useActProgress } from './useScrollProgress';
@@ -7,6 +8,7 @@ import './scrollStory.css';
 
 // ── Act I: The read ──────────────────────────────────────────────────────────
 function ActTitle({ progress }: { progress: number }) {
+  const { t } = useTranslation('marketing');
   const p = ease.clamp(progress);
   const exitFade = 1 - ease.out(ease.range(p, 0.55, 0.95));
   const yShift = ease.range(p, 0.55, 1) * -40;
@@ -22,17 +24,17 @@ function ActTitle({ progress }: { progress: number }) {
           <div className="eyebrow-mono" style={{ marginBottom: 28 }}>
             <span style={{ opacity: 0.6 }}>PG · 01</span>
             <span style={{ margin: '0 10px', opacity: 0.4 }}>/</span>
-            Computational dysmorphology
+            {t('story.act1Eyebrow')}
           </div>
           <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: 'clamp(48px, 6.5vw, 92px)', lineHeight: 0.98, letterSpacing: '-0.035em', color: 'var(--ink)', marginBottom: 32, textWrap: 'balance' }}>
-            Phenotype, precisely read.
+            {t('story.title')}
           </h1>
           <p style={{ fontSize: 18, lineHeight: 1.55, maxWidth: 520, marginBottom: 36, color: 'var(--ink-2)' }}>
-            Phenograph identifies morphological features from a single facial image and ranks candidate syndromes against the HPO ontology.
+            {t('story.lede')}
           </p>
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-            <Link to="/register" style={{ padding: '13px 22px', background: 'var(--teal-bright)', color: '#fff', textDecoration: 'none', borderRadius: 8, fontSize: 14, fontWeight: 500 }}>Request clinical access</Link>
-            <a href="#evidence" style={{ padding: '13px 22px', background: 'transparent', color: 'var(--ink)', textDecoration: 'none', borderRadius: 8, fontSize: 14, fontWeight: 500, border: '1px solid var(--ink)' }}>Read the evidence</a>
+            <Link to="/register" style={{ padding: '13px 22px', background: 'var(--teal-bright)', color: '#fff', textDecoration: 'none', borderRadius: 8, fontSize: 14, fontWeight: 500 }}>{t('story.ctaPrimary')}</Link>
+            <a href="#evidence" style={{ padding: '13px 22px', background: 'transparent', color: 'var(--ink)', textDecoration: 'none', borderRadius: 8, fontSize: 14, fontWeight: 500, border: '1px solid var(--ink)' }}>{t('story.ctaSecondary')}</a>
           </div>
           <div style={{ marginTop: 44, display: 'flex', gap: 32, fontSize: 12, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--ink-3)', fontFamily: 'var(--font-mono)', flexWrap: 'wrap' }}>
             <span>HIPAA-aligned</span><span>SOC 2 Type II</span><span>GDPR</span>
@@ -40,23 +42,24 @@ function ActTitle({ progress }: { progress: number }) {
         </div>
 
         <div style={{ justifySelf: 'end', maxWidth: 320, color: 'var(--ink-3)', fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: '0.06em', lineHeight: 1.8, borderLeft: '1px solid var(--line)', paddingLeft: 20 }}>
-          <div style={{ color: 'var(--teal-bright)', marginBottom: 8 }}>FIG. 01 — IDLE STATE</div>
-          <div>Double-strand reference pattern.</div>
-          <div>127 morphological features indexed.</div>
-          <div>4,317 syndromes linked to HPO.</div>
-          <div style={{ marginTop: 16, opacity: 0.7 }}>Scroll to continue</div>
+          <div style={{ color: 'var(--teal-bright)', marginBottom: 8 }}>{t('story.figIdle')}</div>
+          <div>{t('story.figLine1')}</div>
+          <div>{t('story.figLine2')}</div>
+          <div>{t('story.figLine3')}</div>
+          <div style={{ marginTop: 16, opacity: 0.7 }}>{t('story.scrollToContinue')}</div>
         </div>
       </div>
 
-      <div className="scroll-hint"><span>Scroll</span><span className="bar" /></div>
+      <div className="scroll-hint"><span>{t('story.scroll')}</span><span className="bar" /></div>
     </div>
   );
 }
 
 // ── Act II: The mesh ─────────────────────────────────────────────────────────
 function ActMesh({ progress }: { progress: number }) {
+  const { t } = useTranslation('marketing');
   const p = ease.clamp(progress);
-  const stage = p < 0.22 ? '01 · ARRIVAL' : p < 0.4 ? '02 · LANDMARKING' : p < 0.72 ? '03 · TRIANGULATION' : p < 0.92 ? '04 · CONTOUR' : '05 · ANNOTATED';
+  const stage = p < 0.22 ? t('story.stages.arrival') : p < 0.4 ? t('story.stages.landmarking') : p < 0.72 ? t('story.stages.triangulation') : p < 0.92 ? t('story.stages.contour') : t('story.stages.annotated');
   const countLandmarks = Math.round(ease.clamp(ease.range(p, 0.1, 0.4)) * 34);
   const countEdges = Math.round(ease.clamp(ease.range(p, 0.4, 0.72)) * 64);
 
@@ -66,12 +69,12 @@ function ActMesh({ progress }: { progress: number }) {
       <div className="grain-overlay" />
       <div style={{ position: 'absolute', inset: 0, maxWidth: 1280, margin: '0 auto', padding: '100px 64px 60px', display: 'grid', gridTemplateColumns: '1fr 1.2fr 1fr', gap: 48, alignItems: 'center' }}>
         <div style={{ opacity: ease.range(p, 0.05, 0.25), color: 'var(--ink)' }}>
-          <div className="eyebrow-mono" style={{ marginBottom: 24 }}>PG · 02 / THE MESH</div>
+          <div className="eyebrow-mono" style={{ marginBottom: 24 }}>{t('story.act2Tag')}</div>
           <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(32px, 3.3vw, 52px)', lineHeight: 1.04, letterSpacing: '-0.02em', fontWeight: 500, color: 'var(--ink)', marginBottom: 20, textWrap: 'balance' }}>
-            From a strand of code to a face in reference.
+            {t('story.act2Title')}
           </h2>
           <p style={{ fontSize: 16, lineHeight: 1.6, maxWidth: 360, color: 'var(--ink-2)' }}>
-            Sub-millimeter landmarks are localized against a curated atlas of 127 morphological features, then triangulated into a reference mesh for metric analysis.
+            {t('story.act2Body')}
           </p>
         </div>
 
@@ -81,21 +84,21 @@ function ActMesh({ progress }: { progress: number }) {
 
         <div style={{ opacity: ease.range(p, 0.18, 0.4), justifySelf: 'end', maxWidth: 260, width: '100%', fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: '0.08em', color: 'var(--ink-3)' }}>
           <div style={{ paddingBottom: 14, borderBottom: '1px solid var(--line)', marginBottom: 18, display: 'flex', justifyContent: 'space-between' }}>
-            <span>STAGE</span><span style={{ color: 'var(--teal-bright)' }}>{stage}</span>
+            <span>{t('story.meshStage')}</span><span style={{ color: 'var(--teal-bright)' }}>{stage}</span>
           </div>
           {[
-            { k: 'Landmarks', v: String(countLandmarks).padStart(2, '0'), of: '34' },
-            { k: 'Edges', v: String(countEdges).padStart(2, '0'), of: '64' },
-            { k: 'Atlas', v: 'HPO v2024.4', of: null },
-            { k: 'Model', v: 'pg-face-3.2', of: null },
+            { k: 'landmarks', label: t('story.meshLandmarks'), v: String(countLandmarks).padStart(2, '0'), of: '34' },
+            { k: 'edges', label: t('story.meshEdges'), v: String(countEdges).padStart(2, '0'), of: '64' },
+            { k: 'atlas', label: t('story.meshAtlas'), v: 'HPO v2024.4', of: null },
+            { k: 'model', label: t('story.meshModel'), v: 'pg-face-3.2', of: null },
           ].map((row) => (
             <div key={row.k} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px dashed var(--line)' }}>
-              <span style={{ textTransform: 'uppercase' }}>{row.k}</span>
+              <span style={{ textTransform: 'uppercase' }}>{row.label}</span>
               <span style={{ color: 'var(--ink)' }}>{row.v}{row.of && <span style={{ opacity: 0.4 }}> / {row.of}</span>}</span>
             </div>
           ))}
           <div style={{ marginTop: 24, fontSize: 10, lineHeight: 1.6, opacity: 0.7, textTransform: 'none', letterSpacing: '0.04em' }}>
-            All imagery shown is an abstract reference mesh. Phenograph never exposes identifiable patient faces.
+            {t('story.meshDisclaimer')}
           </div>
         </div>
       </div>
@@ -143,13 +146,14 @@ function MiniBars({ values, progress }: { values: number[]; progress: number }) 
 }
 
 function ActStats({ progress }: { progress: number }) {
+  const { t: tr } = useTranslation('marketing');
   const p = ease.clamp(progress);
   const t = [0.1, 0.18, 0.26, 0.34].map((s) => ease.range(p, s, s + 0.55));
   const stats = [
-    { value: countUp(92, t[0]), suffix: '%', label: 'Top-5 accuracy on blind validation', sub: 'n = 12,400 genetically confirmed cases', chart: <Sparkline data={[52, 58, 64, 71, 76, 81, 85, 89, 91, 92]} progress={t[0]} />, chartLabel: '2018 — 2025' },
-    { value: countUp(4317, t[1]), label: 'Syndromes linked in knowledge graph', sub: 'HPO-aligned · updated quarterly', chart: <MiniBars values={[800, 1500, 2400, 3100, 3800, 4317]} progress={t[1]} />, chartLabel: '6 releases' },
-    { value: countUp(127, t[2]), label: 'Morphological features scored', sub: 'Each with calibrated uncertainty', chart: <Sparkline data={[24, 41, 58, 72, 89, 104, 118, 127]} progress={t[2]} />, chartLabel: 'Atlas growth' },
-    { value: countUp(17, t[3]), label: 'Peer-reviewed publications', sub: 'Nature Genetics · AJHG · JAMA Pediatrics', chart: <MiniBars values={[1, 2, 3, 2, 4, 5]} progress={t[3]} />, chartLabel: 'by year' },
+    { value: countUp(92, t[0]), suffix: '%', label: tr('story.stat.accuracyLabel'), sub: tr('story.stat.accuracySub'), chart: <Sparkline data={[52, 58, 64, 71, 76, 81, 85, 89, 91, 92]} progress={t[0]} />, chartLabel: tr('story.stat.accuracyChart') },
+    { value: countUp(4317, t[1]), label: tr('story.stat.syndromesLabel'), sub: tr('story.stat.syndromesSub'), chart: <MiniBars values={[800, 1500, 2400, 3100, 3800, 4317]} progress={t[1]} />, chartLabel: tr('story.stat.syndromesChart') },
+    { value: countUp(127, t[2]), label: tr('story.stat.featuresLabel'), sub: tr('story.stat.featuresSub'), chart: <Sparkline data={[24, 41, 58, 72, 89, 104, 118, 127]} progress={t[2]} />, chartLabel: tr('story.stat.featuresChart') },
+    { value: countUp(17, t[3]), label: tr('story.stat.pubsLabel'), sub: tr('story.stat.pubsSub'), chart: <MiniBars values={[1, 2, 3, 2, 4, 5]} progress={t[3]} />, chartLabel: tr('story.stat.pubsChart') },
   ];
 
   return (
@@ -158,13 +162,13 @@ function ActStats({ progress }: { progress: number }) {
       <div style={{ position: 'absolute', inset: 0, maxWidth: 1280, margin: '0 auto', padding: '110px 64px 60px', display: 'grid', gridTemplateRows: 'auto 1fr auto', gap: 36 }}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', alignItems: 'end', opacity: ease.range(p, 0, 0.15), gap: 16 }}>
           <div>
-            <div className="eyebrow-mono" style={{ marginBottom: 20 }}>PG · 03 / THE RECORD</div>
+            <div className="eyebrow-mono" style={{ marginBottom: 20 }}>{tr('story.act3Tag')}</div>
             <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(40px, 5vw, 72px)', fontWeight: 500, letterSpacing: '-0.025em', lineHeight: 1.02, color: 'var(--ink)', maxWidth: 860, textWrap: 'balance' }}>
-              Validated evidence, quietly compounding.
+              {tr('story.act3Title')}
             </h2>
           </div>
           <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--ink-3)', textAlign: 'right', lineHeight: 1.9 }}>
-            As of Apr 2026<br /><span style={{ color: 'var(--teal-bright)' }}>● LIVE DATASET</span>
+            {tr('story.asOf')}<br /><span style={{ color: 'var(--teal-bright)' }}>{tr('story.liveDataset')}</span>
           </div>
         </div>
 
@@ -184,10 +188,10 @@ function ActStats({ progress }: { progress: number }) {
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 28, borderTop: '1px solid var(--line)', fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: '0.08em', color: 'var(--ink-3)', opacity: ease.range(p, 0.4, 0.7), gap: 16, flexWrap: 'wrap' }}>
-          <span>Not a diagnostic device. Clinical decision support only.</span>
+          <span>{tr('story.disclaimerShort')}</span>
           <div style={{ display: 'flex', gap: 24 }}>
-            <a href="#" style={{ color: 'inherit', textDecoration: 'none', borderBottom: '1px solid currentColor', paddingBottom: 2 }}>Publications</a>
-            <a href="#" style={{ color: 'inherit', textDecoration: 'none', borderBottom: '1px solid currentColor', paddingBottom: 2 }}>Validation report</a>
+            <a href="#" style={{ color: 'inherit', textDecoration: 'none', borderBottom: '1px solid currentColor', paddingBottom: 2 }}>{tr('story.publications')}</a>
+            <a href="#" style={{ color: 'inherit', textDecoration: 'none', borderBottom: '1px solid currentColor', paddingBottom: 2 }}>{tr('story.validationReport')}</a>
           </div>
         </div>
       </div>
@@ -196,12 +200,13 @@ function ActStats({ progress }: { progress: number }) {
 }
 
 function ProgressRail({ active }: { active: number }) {
-  const items = [['01', 'The read'], ['02', 'The mesh'], ['03', 'The record']];
+  const { t } = useTranslation('marketing');
+  const items: [string, string][] = [['01', 'story.rail.read'], ['02', 'story.rail.mesh'], ['03', 'story.rail.record']];
   return (
     <nav className="pg-progress-rail" aria-label="Section progress">
-      {items.map(([n, label], i) => (
+      {items.map(([n, key], i) => (
         <div key={n} className={'rail-item' + (active === i ? ' active' : '')}>
-          <span>{n} — {label}</span>
+          <span>{n} — {t(key)}</span>
           <span className="tick" />
         </div>
       ))}

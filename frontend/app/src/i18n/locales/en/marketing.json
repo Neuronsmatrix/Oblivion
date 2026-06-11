@@ -1,0 +1,89 @@
+{
+  "nav": {
+    "product": "Product",
+    "evidence": "Evidence",
+    "forClinicians": "For clinicians",
+    "research": "Research"
+  },
+  "story": {
+    "act1Eyebrow": "Computational dysmorphology",
+    "title": "Phenotype, precisely read.",
+    "lede": "Phenograph identifies morphological features from a single facial image and ranks candidate syndromes against the HPO ontology.",
+    "ctaPrimary": "Request clinical access",
+    "ctaSecondary": "Read the evidence",
+    "figIdle": "FIG. 01 — IDLE STATE",
+    "figLine1": "Double-strand reference pattern.",
+    "figLine2": "127 morphological features indexed.",
+    "figLine3": "4,317 syndromes linked to HPO.",
+    "scrollToContinue": "Scroll to continue",
+    "scroll": "Scroll",
+    "act2Tag": "PG · 02 / THE MESH",
+    "act2Title": "From a strand of code to a face in reference.",
+    "act2Body": "Sub-millimeter landmarks are localized against a curated atlas of 127 morphological features, then triangulated into a reference mesh for metric analysis.",
+    "meshStage": "STAGE",
+    "meshLandmarks": "Landmarks",
+    "meshEdges": "Edges",
+    "meshAtlas": "Atlas",
+    "meshModel": "Model",
+    "meshDisclaimer": "All imagery shown is an abstract reference mesh. Phenograph never exposes identifiable patient faces.",
+    "stages": {
+      "arrival": "01 · ARRIVAL",
+      "landmarking": "02 · LANDMARKING",
+      "triangulation": "03 · TRIANGULATION",
+      "contour": "04 · CONTOUR",
+      "annotated": "05 · ANNOTATED"
+    },
+    "act3Tag": "PG · 03 / THE RECORD",
+    "act3Title": "Validated evidence, quietly compounding.",
+    "asOf": "As of Apr 2026",
+    "liveDataset": "● LIVE DATASET",
+    "disclaimerShort": "Not a diagnostic device. Clinical decision support only.",
+    "publications": "Publications",
+    "validationReport": "Validation report",
+    "stat": {
+      "accuracyLabel": "Top-5 accuracy on blind validation",
+      "accuracySub": "n = 12,400 genetically confirmed cases",
+      "accuracyChart": "2018 — 2025",
+      "syndromesLabel": "Syndromes linked in knowledge graph",
+      "syndromesSub": "HPO-aligned · updated quarterly",
+      "syndromesChart": "6 releases",
+      "featuresLabel": "Morphological features scored",
+      "featuresSub": "Each with calibrated uncertainty",
+      "featuresChart": "Atlas growth",
+      "pubsLabel": "Peer-reviewed publications",
+      "pubsSub": "Nature Genetics · AJHG · JAMA Pediatrics",
+      "pubsChart": "by year"
+    },
+    "rail": { "read": "The read", "mesh": "The mesh", "record": "The record" }
+  },
+  "features": {
+    "eyebrow": "What it does",
+    "heading": "A quiet tool that extends clinical expertise — not a replacement for it.",
+    "landmark": { "title": "Landmark phenotyping", "body": "Sub-millimeter facial landmarking against a curated atlas of 127 morphological features, scored with uncertainty." },
+    "ranking": { "title": "Syndrome ranking", "body": "Bayesian ranking across 4,300+ syndromes linked to the Human Phenotype Ontology. Clinicians see posterior probabilities, not black-box scores." },
+    "workflow": { "title": "Clinical workflow", "body": "Case notes, features, and candidate panels export to FHIR. Integrates with existing EHRs without forcing a rebuild." }
+  },
+  "evidence": {
+    "eyebrow": "Evidence",
+    "heading": "Validated against 12,000+ genetically confirmed cases across 41 institutions.",
+    "accuracy": "Top-5 accuracy on blind validation set of rare syndrome cases.",
+    "syndromes": "Syndromes covered in the linked knowledge graph. HPO-aligned.",
+    "publications": "Peer-reviewed publications. Nature Genetics, AJHG, JAMA Pediatrics."
+  },
+  "footer": {
+    "tagline": "Computational dysmorphology for clinical genetics.",
+    "copyright": "© 2026 Phenograph, Inc. Not a diagnostic device. For clinical decision support only.",
+    "cols": {
+      "product": "Product",
+      "evidence": "Evidence",
+      "company": "Company",
+      "legal": "Legal"
+    },
+    "links": {
+      "overview": "Overview", "clinicalWorkflow": "Clinical workflow", "integrations": "Integrations", "security": "Security", "changelog": "Changelog",
+      "publications": "Publications", "validation": "Validation", "hpoAlignment": "HPO alignment", "limitations": "Limitations",
+      "about": "About", "researchEthics": "Research ethics", "careers": "Careers", "contact": "Contact",
+      "privacy": "Privacy", "terms": "Terms", "dpa": "DPA", "responsibleUse": "Responsible use"
+    }
+  }
+}
