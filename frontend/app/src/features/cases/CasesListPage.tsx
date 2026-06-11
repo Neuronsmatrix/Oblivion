@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ChevronRight, Plus } from 'lucide-react';
-import { Page, PageHeader, formatDate, formatAge } from '../../components/layout/Page';
+import { Page, PageHeader, formatDate } from '../../components/layout/Page';
 import { Button, EmptyState, ErrorState, Pagination, Spinner, StatusPill } from '../../components/ui';
 import type { CaseStatus } from '../../lib/api/types';
 import { useCases } from './queries';
@@ -20,6 +20,7 @@ export function CasesListPage() {
   const { data: cases, isLoading, isError, refetch } = useCases(offset);
 
   const filterLabel = (id: 'all' | CaseStatus) => (id === 'all' ? t('list.filterAll') : tc(`status.${id}`));
+  const ageLabel = (age?: number | null) => (age === null || age === undefined ? tc('value.none') : tc('value.ageYears', { age }));
 
   const visible = useMemo(
     () => (cases ?? []).filter((c) => filter === 'all' || c.status === filter),
@@ -79,7 +80,7 @@ export function CasesListPage() {
                 <div style={{ color: 'var(--ink)' }}>{c.patient_name || t('unnamedPatient')}</div>
                 <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--fs-12)', color: 'var(--ink-4)' }}>{c.id.slice(0, 8)}</div>
               </div>
-              <div style={{ color: 'var(--ink-2)' }}>{formatAge(c.patient_age)}</div>
+              <div style={{ color: 'var(--ink-2)' }}>{ageLabel(c.patient_age)}</div>
               <div><StatusPill status={c.status} /></div>
               <div style={{ color: 'var(--ink-3)', fontSize: 'var(--fs-13)' }}>{formatDate(c.created_at)}</div>
               <div style={{ color: 'var(--ink-3)', display: 'flex', justifyContent: 'flex-end' }}><ChevronRight size={16} /></div>

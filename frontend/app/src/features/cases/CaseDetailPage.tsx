@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ChevronLeft, Pencil } from 'lucide-react';
-import { Page, formatDate, formatAge } from '../../components/layout/Page';
+import { Page, formatDate } from '../../components/layout/Page';
 import {
   Button, Card, ErrorState, Field, Input, Modal, SectionCard,
   Spinner, StatusPill, ConfidenceBar, useToast,
@@ -42,7 +42,7 @@ export function CaseDetailPage() {
           <div style={{ display: 'flex', gap: 12, marginTop: 8, fontSize: 'var(--fs-13)', color: 'var(--ink-2)', flexWrap: 'wrap' }}>
             <span>{c.patient_name || t('unnamedPatient')}</span>
             <span>·</span>
-            <span>{formatAge(c.patient_age)}</span>
+            <span>{c.patient_age === null || c.patient_age === undefined ? tc('value.none') : tc('value.ageYears', { age: c.patient_age })}</span>
             {c.patient_ethnicity && <><span>·</span><span>{c.patient_ethnicity}</span></>}
             <span>·</span>
             <span>{t('detail.uploadedOn', { date: formatDate(c.created_at) })}</span>

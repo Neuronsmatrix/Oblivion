@@ -1,0 +1,10 @@
+{
+  "eyebrow": "Account",
+  "title": "Profile",
+  "name": "Name",
+  "email": "Email",
+  "accountType": "Account type",
+  "organization": "Organization",
+  "managedNote": "Profile details are managed by your organization administrator.",
+  "roles": { "doctor": "Clinician", "lab": "Laboratory", "admin": "Administrator" }
+}

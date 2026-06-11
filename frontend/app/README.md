@@ -38,6 +38,27 @@ npm run build        # type-check + production bundle into dist/
 - **Lab flow** — batch submit, batch results (polled), monthly usage, plans & subscribe.
 - **Shared** — syndrome reference + detail, HPO feature atlas, notifications, profile.
 
+## Localization (i18n)
+
+The app ships **Russian (default)** and **English**, built on **react-i18next**.
+
+- Default language is Russian. Switch via the language selector in the marketing
+  nav or the app sidebar footer. The choice is remembered in `localStorage`
+  (`phenograph.lang`) and reused on return visits; with no stored value the app
+  falls back to Russian.
+- Translations live in `src/i18n/locales/<lng>/<namespace>.json`, one namespace
+  per feature area (`common`, `nav`, `marketing`, `auth`, `cases`, `labs`,
+  `reference`, `notifications`, `profile`). Register a new namespace in
+  `src/i18n/resources.ts` (and it is automatically covered by the parity test).
+- Components read strings with `useTranslation('<namespace>')` + `t('key')`.
+  Russian plural forms use i18next's `_one/_few/_many` suffixes.
+- `src/i18n/react-i18next.d.ts` makes translation keys type-checked at compile time.
+- `npm test` runs a **key-parity test** that fails if `ru` and `en` drift out of
+  sync (missing/typo'd keys), plus a bilingual landing-page smoke test.
+- Proper nouns kept verbatim in both languages: the brand "Phenograph",
+  model/version ids (`pg-face-3.2`, `HPO v2024.4`), publication venues, and
+  standards acronyms (HIPAA, SOC 2, GDPR). Dates use the browser locale.
+
 ## Structure
 
 - `src/lib/api/` — `apiFetch` (envelope unwrap + refresh), typed endpoints, domain types.

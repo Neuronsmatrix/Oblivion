@@ -1,0 +1,7 @@
+{
+  "eyebrow": "Workspace",
+  "title": "Notifications",
+  "loadError": "Could not load notifications.",
+  "emptyTitle": "No notifications",
+  "emptyMessage": "You're all caught up."
+}

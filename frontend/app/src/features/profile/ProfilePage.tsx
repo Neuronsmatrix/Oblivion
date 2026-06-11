@@ -1,24 +1,26 @@
 import { LogOut } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../auth/AuthContext';
 import { Page, PageHeader } from '../../components/layout/Page';
 import { Button, Card } from '../../components/ui';
 
-const roleLabel: Record<string, string> = { doctor: 'Clinician', lab: 'Laboratory', admin: 'Administrator' };
-
 export function ProfilePage() {
+  const { t } = useTranslation('profile');
+  const { t: tc } = useTranslation('common');
   const { user, logout } = useAuth();
   if (!user) return null;
 
-  const rows = [
-    ['Name', user.name],
-    ['Email', user.email],
-    ['Account type', roleLabel[user.role] ?? user.role],
-    ['Organization', user.organization || '—'],
+  const roleLabel = t(`roles.${user.role}`, { defaultValue: user.role });
+  const rows: [string, string][] = [
+    [t('name'), user.name],
+    [t('email'), user.email],
+    [t('accountType'), roleLabel],
+    [t('organization'), user.organization || tc('value.none')],
   ];
 
   return (
     <Page max={620}>
-      <PageHeader eyebrow="Account" title="Profile" />
+      <PageHeader eyebrow={t('eyebrow')} title={t('title')} />
 
       <Card>
         <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -32,11 +34,11 @@ export function ProfilePage() {
       </Card>
 
       <p style={{ fontSize: 'var(--fs-13)', color: 'var(--ink-3)', marginTop: 14 }}>
-        Profile details are managed by your organization administrator.
+        {t('managedNote')}
       </p>
 
       <div style={{ marginTop: 20 }}>
-        <Button variant="secondary" onClick={() => logout()}><LogOut size={14} /> Sign out</Button>
+        <Button variant="secondary" onClick={() => logout()}><LogOut size={14} /> {tc('actions.signOut')}</Button>
       </div>
     </Page>
   );
