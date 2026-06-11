@@ -1,9 +1,12 @@
 import { NavLink } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../auth/AuthContext';
 import { useUnreadCount } from '../../features/notifications/queries';
+import { LanguageSwitcher } from '../ui';
 import { navForRole } from './nav';
 
 export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
+  const { t } = useTranslation('nav');
   const { user } = useAuth();
   const unread = useUnreadCount();
   if (!user) return null;
@@ -23,7 +26,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
 
       {items.map((item) => {
         const Icon = item.icon;
-        const showBadge = item.label === 'Notifications' && unread > 0;
+        const showBadge = item.key === 'notifications' && unread > 0;
         return (
           <NavLink
             key={item.to}
@@ -42,7 +45,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
               <>
                 {isActive && <div style={{ position: 'absolute', left: -14, top: 6, bottom: 6, width: 2, background: 'var(--teal-bright)', borderRadius: 1 }} />}
                 <Icon size={16} strokeWidth={1.75} />
-                <span>{item.label}</span>
+                <span>{t(item.key)}</span>
                 {showBadge && (
                   <span style={{ marginLeft: 'auto', minWidth: 18, height: 18, padding: '0 5px', borderRadius: 9, background: 'var(--teal-bright)', color: '#fff', fontSize: 11, fontWeight: 600, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                     {unread}
@@ -55,6 +58,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
       })}
 
       <div style={{ marginTop: 'auto', padding: '12px 10px', fontSize: 'var(--fs-12)', color: 'var(--ink-3)', borderTop: '1px solid var(--line)' }}>
+        <div style={{ marginBottom: 12 }}><LanguageSwitcher compact /></div>
         <div style={{ fontWeight: 500, color: 'var(--ink-2)' }}>{user.name}</div>
         {user.organization && <div style={{ fontFamily: 'var(--font-mono)', marginTop: 2 }}>{user.organization}</div>}
       </div>

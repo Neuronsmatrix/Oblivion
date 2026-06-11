@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../auth/AuthContext';
 import { Button, Field, Input, Select } from '../../components/ui';
 import { ApiError } from '../../lib/api/client';
@@ -7,6 +8,8 @@ import type { Role } from '../../lib/api/types';
 import { AuthLayout } from './AuthLayout';
 
 export function RegisterPage() {
+  const { t } = useTranslation('auth');
+  const { t: tc } = useTranslation('common');
   const { register } = useAuth();
   const navigate = useNavigate();
   const [form, setForm] = useState({ name: '', email: '', password: '', role: 'doctor' as Role, organization: '' });
@@ -18,7 +21,7 @@ export function RegisterPage() {
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    if (form.password.length < 8) { setError('Password must be at least 8 characters.'); return; }
+    if (form.password.length < 8) { setError(t('register.passwordTooShort')); return; }
     setBusy(true);
     try {
       await register({
@@ -27,7 +30,7 @@ export function RegisterPage() {
       });
       navigate('/app', { replace: true });
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Unable to create the account. Please try again.');
+      setError(err instanceof ApiError ? err.message : t('register.error'));
     } finally {
       setBusy(false);
     }
@@ -35,31 +38,31 @@ export function RegisterPage() {
 
   return (
     <AuthLayout
-      title="Request access"
-      subtitle="Create an account for clinical decision support."
-      footer={<>Already have an account? <Link to="/login">Sign in</Link></>}
+      title={t('register.title')}
+      subtitle={t('register.subtitle')}
+      footer={<>{t('register.footer')} <Link to="/login">{tc('actions.signIn')}</Link></>}
     >
       <form onSubmit={onSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-        <Field label="Full name" htmlFor="name">
-          <Input id="name" required value={form.name} onChange={(e) => set('name', e.target.value)} placeholder="Dr. Jane Doe" />
+        <Field label={t('fields.fullName')} htmlFor="name">
+          <Input id="name" required value={form.name} onChange={(e) => set('name', e.target.value)} placeholder={t('fields.namePlaceholder')} />
         </Field>
-        <Field label="Email" htmlFor="email">
-          <Input id="email" type="email" autoComplete="email" required value={form.email} onChange={(e) => set('email', e.target.value)} placeholder="you@hospital.org" />
+        <Field label={t('fields.email')} htmlFor="email">
+          <Input id="email" type="email" autoComplete="email" required value={form.email} onChange={(e) => set('email', e.target.value)} placeholder={t('fields.emailPlaceholder')} />
         </Field>
-        <Field label="Account type" htmlFor="role" hint="Doctors review individual cases; labs submit batches.">
+        <Field label={t('fields.accountType')} htmlFor="role" hint={t('fields.accountTypeHint')}>
           <Select id="role" value={form.role} onChange={(e) => set('role', e.target.value as Role)}>
-            <option value="doctor">Clinician (doctor)</option>
-            <option value="lab">Laboratory</option>
+            <option value="doctor">{t('fields.roleDoctor')}</option>
+            <option value="lab">{t('fields.roleLab')}</option>
           </Select>
         </Field>
-        <Field label="Organization" htmlFor="org" hint="Optional.">
-          <Input id="org" value={form.organization} onChange={(e) => set('organization', e.target.value)} placeholder="Boston Children's Hospital" />
+        <Field label={t('fields.organization')} htmlFor="org" hint={t('fields.organizationHint')}>
+          <Input id="org" value={form.organization} onChange={(e) => set('organization', e.target.value)} placeholder={t('fields.orgPlaceholder')} />
         </Field>
-        <Field label="Password" htmlFor="password" hint="At least 8 characters.">
+        <Field label={t('fields.password')} htmlFor="password" hint={t('fields.passwordHint')}>
           <Input id="password" type="password" autoComplete="new-password" required value={form.password} onChange={(e) => set('password', e.target.value)} />
         </Field>
         {error && <div style={{ fontSize: 'var(--fs-13)', color: 'var(--danger)' }}>{error}</div>}
-        <Button type="submit" block loading={busy}>Create account</Button>
+        <Button type="submit" block loading={busy}>{tc('actions.createAccount')}</Button>
       </form>
     </AuthLayout>
   );

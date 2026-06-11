@@ -1,17 +1,20 @@
 import type { CSSProperties, ReactNode } from 'react';
 import { Inbox, TriangleAlert } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import type { CaseStatus } from '../../lib/api/types';
 
 // ── StatusPill ────────────────────────────────────────────────────────────
-const statusStyle: Record<CaseStatus, { bg: string; fg: string; label: string; pulse?: boolean }> = {
-  pending: { bg: 'var(--paper-2)', fg: 'var(--ink-3)', label: 'Pending' },
-  processing: { bg: 'var(--info-bg)', fg: 'var(--info)', label: 'Processing', pulse: true },
-  completed: { bg: 'var(--success-bg)', fg: 'var(--success)', label: 'Completed' },
-  failed: { bg: 'var(--danger-bg)', fg: 'var(--danger)', label: 'Failed' },
+const statusStyle: Record<CaseStatus, { bg: string; fg: string; pulse?: boolean }> = {
+  pending: { bg: 'var(--paper-2)', fg: 'var(--ink-3)' },
+  processing: { bg: 'var(--info-bg)', fg: 'var(--info)', pulse: true },
+  completed: { bg: 'var(--success-bg)', fg: 'var(--success)' },
+  failed: { bg: 'var(--danger-bg)', fg: 'var(--danger)' },
 };
 
 export function StatusPill({ status }: { status: CaseStatus }) {
+  const { t } = useTranslation('common');
   const s = statusStyle[status] ?? statusStyle.pending;
+  const key: CaseStatus = statusStyle[status] ? status : 'pending';
   return (
     <span
       style={{
@@ -21,7 +24,7 @@ export function StatusPill({ status }: { status: CaseStatus }) {
         animation: s.pulse ? 'pg-pulse 1.6s var(--ease-in-out) infinite' : undefined,
       }}
     >
-      {s.label}
+      {t(`status.${key}`)}
     </span>
   );
 }
@@ -72,10 +75,11 @@ export function Spinner({ size = 20, label }: { size?: number; label?: string })
   );
 }
 
-export function FullPageSpinner({ label = 'Loading…' }: { label?: string }) {
+export function FullPageSpinner({ label }: { label?: string }) {
+  const { t } = useTranslation('common');
   return (
     <div style={{ minHeight: '100vh', display: 'grid', placeItems: 'center', background: 'var(--paper)' }}>
-      <Spinner size={28} label={label} />
+      <Spinner size={28} label={label ?? t('state.loading')} />
     </div>
   );
 }
@@ -96,6 +100,7 @@ export function EmptyState({ title, message, action }: { title: string; message?
   return <StateBlock icon={<Inbox size={28} strokeWidth={1.5} color="var(--ink-4)" />} title={title} message={message} action={action} />;
 }
 
-export function ErrorState({ title = 'Something went wrong', message, action }: { title?: string; message?: string; action?: ReactNode }) {
-  return <StateBlock icon={<TriangleAlert size={28} strokeWidth={1.5} color="var(--danger)" />} title={title} message={message} action={action} />;
+export function ErrorState({ title, message, action }: { title?: string; message?: string; action?: ReactNode }) {
+  const { t } = useTranslation('common');
+  return <StateBlock icon={<TriangleAlert size={28} strokeWidth={1.5} color="var(--danger)" />} title={title ?? t('state.somethingWentWrong')} message={message} action={action} />;
 }

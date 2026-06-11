@@ -1,11 +1,13 @@
 import { useRef, useState } from 'react';
 import { Upload } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export function Dropzone({
   onFiles, multiple = false, accept = 'image/*', hint,
 }: {
   onFiles: (files: File[]) => void; multiple?: boolean; accept?: string; hint?: string;
 }) {
+  const { t } = useTranslation('common');
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
 
@@ -42,7 +44,7 @@ export function Dropzone({
         <Upload size={24} strokeWidth={1.5} color="var(--ink-3)" />
       </div>
       <div style={{ fontSize: 'var(--fs-14)', color: 'var(--ink-2)', fontWeight: 500 }}>
-        Drop {multiple ? 'images' : 'an image'} here, or click to browse
+        {multiple ? t('dropzone.promptMany') : t('dropzone.promptOne')}
       </div>
       {hint && <div style={{ fontSize: 'var(--fs-12)', color: 'var(--ink-3)', marginTop: 6 }}>{hint}</div>}
     </div>
